@@ -50,8 +50,8 @@
 
   // 홍보 게시판 폼 & 시트
   // 폼 순서: 분류(동아리/스터디/과외 객관식) → 제목 → 내용 → 연락처
-  const PROMO_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ4oEbFdCvvnDgcr4x2ouuY2psHhXWw50kvQvXK1E8h4tHkG2ClqlXXbBY9zyThIWJF8sF6j6a1WhUU/pub?gid=440448854&single=true&output=csv";
-  const PROMO_FORM_URL = "https://forms.gle/ShPNz97ibn6YBgRt5";
+  const PROMO_CSV_URL = "";
+  const PROMO_FORM_URL = "";
 
   // 자료 링크 — ["보이는 이름", "주소"] 형식으로 여러 개 추가 가능
   const DRIVE_LINKS = [
@@ -739,6 +739,22 @@ SKA 한인학생회 선후배가 함께 후기와 정보를 나누는 공간이�
   .row-item.gx { gap:12px; }
   .gx-ico { font-size:22px; flex:none; }
 
+  /* 게시판 목록 · 글 보기 */
+  .prow-meta { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-bottom:4px; font-size:12px; }
+  .prow-meta .pill { font-size:11.5px; padding:2px 8px; }
+  .post-row .name { font-size:15.5px; }
+  .row-item.pin { background:var(--accent-soft); }
+  .rows .is-sample .name { color:var(--sub); }
+  .post-detail { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px 16px 20px; margin-top:12px; }
+  .post-detail.is-sample { border-style:dashed; }
+  .post-detail .meta { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .post-detail .meta .prow-meta { margin:0; }
+  .post-detail h1 { font-size:clamp(20px, 6vw, 24px); line-height:1.3; margin:10px 0 12px; text-wrap:balance; }
+  .pd-body { margin:0; white-space:pre-wrap; white-space-collapse:preserve-breaks; word-break:keep-all;
+             overflow-wrap:break-word; font-size:15.5px; line-height:1.75; text-wrap:pretty; }
+  .post-detail .photos { margin-top:14px; }
+  .post-detail .contact { margin-top:14px; padding-top:12px; border-top:1px solid var(--line); }
+
   /* 아주 좁은 화면 (320px 대): 학년 탭을 두 줄로 */
   @media (max-width:350px) {
     .scroll-tabs, .scroll-tabs.g5 { grid-template-columns:repeat(4,1fr); gap:5px; }
@@ -960,18 +976,18 @@ async function load() {
   })).reverse();
   // 홍보: 타임스탬프, 분류, 제목, 내용, 연락처
   const isSample = url => !url && !ANY_SHEET;
-  promos = pRows.filter(r => has(r[2]) || has(r[3])).map(r => ({
-    date: cleanDate(r[0]), cat: (r[1] || "기타").trim(), title: r[2], body: r[3], contact: r[4], sample: isSample(PROMO_CSV_URL),
+  promos = pRows.map((r, i) => [r, i]).filter(([r]) => has(r[2]) || has(r[3])).map(([r, i]) => ({
+    id: i, date: cleanDate(r[0]), cat: (r[1] || "기타").trim(), title: r[2], body: r[3], contact: r[4], sample: isSample(PROMO_CSV_URL),
   })).reverse();
   // 정보: 타임스탬프, 제목, 내용, 링크, 사진, (고정) — 고정글 먼저, 나머지는 최신순
-  const info = iRows.filter(r => has(r[1])).map(r => ({
-    date: cleanDate(r[0]), title: r[1], body: r[2], link: r[3], pin: has(r[5]), sample: isSample(INFO_CSV_URL),
+  const info = iRows.map((r, i) => [r, i]).filter(([r]) => has(r[1])).map(([r, i]) => ({
+    id: i, date: cleanDate(r[0]), title: r[1], body: r[2], link: r[3], pin: has(r[5]), sample: isSample(INFO_CSV_URL),
     photos: (r[4] || "").split(/[\s,]+/).filter(Boolean).map(photoURL),
   })).reverse();
   infos = [...info.filter(x => x.pin), ...info.filter(x => !x.pin)];
   // 졸업생: 타임스탬프, 단과대, 졸업 연도, 분류, 제목, 내용, 연락처
-  grads = gRows.filter(r => has(r[4]) || has(r[5])).map(r => ({
-    date: cleanDate(r[0]), college: collegeOf(r[1]), year: (r[2] || "").trim(), cat: (r[3] || "기타").trim(), title: r[4], body: r[5], contact: r[6], sample: isSample(GRAD_CSV_URL),
+  grads = gRows.map((r, i) => [r, i]).filter(([r]) => has(r[4]) || has(r[5])).map(([r, i]) => ({
+    id: i, date: cleanDate(r[0]), college: collegeOf(r[1]), year: (r[2] || "").trim(), cat: (r[3] || "기타").trim(), title: r[4], body: r[5], contact: r[6], sample: isSample(GRAD_CSV_URL),
   })).reverse();
   loaded = true;
   route();
@@ -1017,9 +1033,8 @@ function bindHeader() {
 const nickDate = x => `<span class="muted">${has(x.nick) ? `<span class="nick">${esc(x.nick.trim().slice(0, 20))}</span> · ` : ""}${esc(x.date)}</span>`;
 const sampleBadge = x => x.sample ? '<span class="sample-badge">예시</span>' : "";
 // 후기 화면 공통 배너 — 항상 보이고, 시트 연결 전에는 예시 안내가 작게 붙어요
-const honeyBanner = () => `<div class="notice honey"><b>🍯 꿀팁은 나눌수록 커져요</b>${usingSample
-  ? '<span class="honey-sub">지금은 예시 내용이에요 · 시트를 연결하면 실제 글이 보여요</span>' : ""}</div>`;
-const sampleNotice = () => usingSample ? '<div class="notice"><span class="nb">지금은 예시 내용이에요 ·</span> <span class="nb">시트를 연결하면 실제 글이 보여요</span></div>' : "";
+const honeyBanner = () => `<div class="notice honey"><b>🍯 꿀팁은 나눌수록 커져요</b></div>`;
+const sampleNotice = () => "";  // 예시 안내 문구 없음 (예시 글에는 '예시' 표시만 붙어요)
 function bindPosts() {
   // 내용이 짧으면 '더보기' 숨기기
   document.querySelectorAll(".post").forEach(el => {
@@ -1298,6 +1313,56 @@ function renderExam() {
 }
 
 // ===== 홍보 게시판 =====
+// ===== 게시판 공통: 목록은 제목만, 누르면 글 보기 =====
+const promoPills = p => `${sampleBadge(p)}<span class="pill">${esc(p.cat)}</span>`;
+const infoPills = x => `${sampleBadge(x)}${x.pin ? '<span class="pill">고정</span>' : ""}`;
+const gradPills = p => `${sampleBadge(p)}<span class="pill">${esc(p.cat)}</span>${has(p.year) ? `<span class="muted">${esc(p.year.replace(/\D/g, "") || p.year)} 졸업</span>` : ""}`;
+const BOARDS = {
+  promo: { name: () => "홍보", list: () => promos, pills: promoPills },
+  info:  { name: () => "정보", list: () => infos,  pills: infoPills },
+  grad:  { name: () => college + " 졸업생", list: () => grads, pills: gradPills },
+};
+function postRows(kind, list, emptyMsg) {
+  if (!list.length) return `<p class="empty">${emptyMsg}</p>`;
+  return `<div class="rows list-top">${list.map(x => `
+    <div class="row-item post-row ${x.pin ? "pin" : ""} ${x.sample ? "is-sample" : ""}" data-k="${kind}" data-id="${x.id}">
+      <div>
+        <div class="prow-meta">${BOARDS[kind].pills(x)}</div>
+        <div class="name">${esc(x.title || "(제목 없음)")}</div>
+        <div class="meta2">${esc(x.date)}</div>
+      </div>
+      <span class="chev">›</span>
+    </div>`).join("")}</div>`;
+}
+function bindPostRows() {
+  document.querySelectorAll(".post-row").forEach(el => el.onclick = () =>
+    location.hash = "post=" + el.dataset.k + "&id=" + el.dataset.id);
+}
+function renderPost(kind, id) {
+  const B = BOARDS[kind];
+  const x = B.list().find(p => String(p.id) === String(id));
+  view = kind;
+  if (x && x.college) college = x.college;
+  const back = `<button class="back" onclick="location.hash='v=${kind}'">← ${esc(B.name())} 게시판</button>`;
+  if (!x) {
+    $app.innerHTML = back + '<p class="empty">글을 찾을 수 없어요<br>지워졌거나 아직 불러오는 중이에요</p>';
+    return;
+  }
+  const contactLine = kind === "info" ? (has(x.link) ? `<div class="contact">🔗 ${linkify(x.link)}</div>` : "")
+    : (has(x.contact) ? `<div class="contact">연락처 · ${linkify(x.contact)}</div>` : "");
+  $app.innerHTML = `
+    ${back}
+    <article class="post-detail ${x.sample ? "is-sample" : ""}">
+      <div class="meta"><span class="prow-meta">${B.pills(x)}</span><span class="muted">${esc(x.date)}</span></div>
+      <h1>${esc(x.title || "(제목 없음)")}</h1>
+      ${has(x.body) ? `<p class="pd-body">${linkify(x.body)}</p>` : ""}
+      ${x.photos && x.photos.length ? `<div class="photos">${x.photos.map(u =>
+        `<a href="${esc(u)}" target="_blank"><img src="${esc(u)}" alt="" loading="lazy" onerror="this.parentNode.remove()"></a>`).join("")}</div>` : ""}
+      ${contactLine}
+    </article>`;
+  window.scrollTo(0, 0);
+}
+
 function renderPromo() {
   const cats = ["전체", "동아리", "스터디", "과외", ...new Set(promos.map(p => p.cat).filter(c => !["동아리","스터디","과외"].includes(c)))];
   const list = promoCat === "전체" ? promos : promos.filter(p => p.cat === promoCat);
@@ -1307,20 +1372,11 @@ function renderPromo() {
     <div class="chips">${cats.map(c =>
       `<button class="tab ${c === promoCat ? "on" : ""}" data-c="${esc(c)}">${esc(c)}</button>`).join("")}</div>
     ${sampleNotice()}
-    <div class="list-top">
-    ${list.map(p => `
-      <div class="post">
-        <div class="meta"><span>${sampleBadge(p)}<span class="pill">${esc(p.cat)}</span></span><span class="muted">${esc(p.date)}</span></div>
-        <h3>${esc(p.title)}</h3>
-        <p class="body">${linkify(p.body)}</p>
-        <div class="more">더보기</div>
-        ${has(p.contact) ? `<div class="contact">연락처 · ${linkify(p.contact)}</div>` : ""}
-      </div>`).join("") || '<p class="empty">아직 홍보글이 없어요</p>'}
-    </div>
+    ${postRows("promo", list, "아직 홍보글이 없어요")}
     ${credit()}
     <a class="btn fab" href="${esc(PROMO_FORM_URL || "#")}" target="_blank">✏️ 홍보글 쓰기</a>`;
 
-  bindHeader(); bindPosts();
+  bindHeader(); bindPostRows();
   document.querySelectorAll(".chips .tab").forEach(el => el.onclick = () => { promoCat = el.dataset.c; renderPromo(); });
 }
 
@@ -1334,22 +1390,11 @@ function renderInfo() {
   $app.innerHTML = `
     ${header()}
     ${sampleNotice()}
-    <div class="list-top">
-    ${infos.map(x => `
-      <div class="post ${x.pin ? "pin" : ""}">
-        <div class="meta"><span>${sampleBadge(x)}${x.pin ? '<span class="pill">고정</span>' : ""}</span><span class="muted">${esc(x.date)}</span></div>
-        <h3>${esc(x.title)}</h3>
-        <p class="body">${linkify(x.body)}</p>
-        <div class="more">더보기</div>
-        ${x.photos.length ? `<div class="photos">${x.photos.map(u =>
-          `<a href="${esc(u)}" target="_blank"><img src="${esc(u)}" alt="" loading="lazy" onerror="this.parentNode.remove()"></a>`).join("")}</div>` : ""}
-        ${has(x.link) ? `<div class="contact">${linkify(x.link)}</div>` : ""}
-      </div>`).join("") || '<p class="empty">아직 정보글이 없어요</p>'}
-    </div>
+    ${postRows("info", infos, "아직 정보글이 없어요")}
     ${credit()}
     <a class="btn fab" href="${esc(INFO_FORM_URL || "#")}" target="_blank">✏️ 정보 공유하기</a>`;
 
-  bindHeader(); bindPosts();
+  bindHeader(); bindPostRows();
 }
 
 // ===== 졸업생 게시판 =====
@@ -1366,26 +1411,19 @@ function renderGrad() {
     <div class="chips">${cats.map(c =>
       `<button class="tab ${c === gradCat ? "on" : ""}" data-c="${esc(c)}">${esc(c)}</button>`).join("")}</div>
     ${sampleNotice()}
-    <div class="list-top">
-    ${list.map(p => `
-      <div class="post">
-        <div class="meta"><span>${sampleBadge(p)}<span class="pill">${esc(p.cat)}</span>${has(p.year) ? ` <span class="muted">${esc(p.year.replace(/\D/g, "") || p.year)} 졸업</span>` : ""}</span><span class="muted">${esc(p.date)}</span></div>
-        <h3>${esc(p.title)}</h3>
-        <p class="body">${linkify(p.body)}</p>
-        <div class="more">더보기</div>
-        ${has(p.contact) ? `<div class="contact">연락처 · ${linkify(p.contact)}</div>` : ""}
-      </div>`).join("") || `<p class="empty">아직 ${college} 졸업생 글이 없어요</p>`}
-    </div>
+    ${postRows("grad", list, `아직 ${college} 졸업생 글이 없어요`)}
     ${credit()}
     <a class="btn fab" href="${esc(withParams(GRAD_FORM_URL, GRAD_COLLEGE_ENTRY ? [GRAD_COLLEGE_ENTRY + '=' + encodeURIComponent(college)] : []))}" target="_blank">✏️ 졸업생 글쓰기</a>`;
 
-  bindHeader(); bindPosts(); bindColleges(renderGrad);
+  bindHeader(); bindPostRows(); bindColleges(renderGrad);
   document.querySelectorAll(".chips .tab").forEach(el => el.onclick = () => { gradCat = el.dataset.c; renderGrad(); });
 }
 
 function route() {
   const m = location.hash.match(/^#(?:c=([^&]+)&)?g=(\d|E)&(?:k=([RMCEF])&)?s=(.+)$/);
   const v = location.hash.match(/^#v=(\w+)$/);
+  const pp = location.hash.match(/^#post=(promo|info|grad)&id=(\d+)$/);
+  if (pp) { renderPost(pp[1], pp[2]); return; }
   const gx = location.hash.match(/^#c=([^&]+)&gradexam$/);
   if (gx) {
     view = "subject";
