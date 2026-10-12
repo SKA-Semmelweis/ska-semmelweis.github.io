@@ -27,6 +27,8 @@
   const UPPER_FORM_URL = "";
   const UPPER_COLLEGE_GRADE_ENTRY = "";
   const UPPER_KIND_ENTRY = "";
+  // 실제 글이 이 개수보다 적으면 예시 글을 같이 보여줘요 (게시판 · 폼마다 따로 세요)
+  const SAMPLE_UNTIL = 3;
   // 사이트 제목
   const SITE_TITLE = "Semmelweis University";
   const SITE_SUBTITLE = "SKA 한인학생회";
@@ -51,7 +53,7 @@
   // 홍보 게시판 폼 & 시트
   // 폼 순서: 분류(동아리/스터디/과외 객관식) → 제목 → 내용 → 연락처
   const PROMO_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ4oEbFdCvvnDgcr4x2ouuY2psHhXWw50kvQvXK1E8h4tHkG2ClqlXXbBY9zyThIWJF8sF6j6a1WhUU/pub?gid=440448854&single=true&output=csv";
-  const PROMO_FORM_URL = "https://forms.gle/zbYVoj8oPrrDgR4i7";
+  const PROMO_FORM_URL = "https://forms.gle/1qFpBvawroz5M5Dg6";
 
   // 자료 링크 — ["보이는 이름", "주소"] 형식으로 여러 개 추가 가능
   const DRIVE_LINKS = [
@@ -749,6 +751,7 @@ SKA 한인학생회 선후배가 함께 후기와 정보를 나누는 공간이�
   .post-detail.is-sample { border-style:dashed; }
   .post-detail .meta { display:flex; justify-content:space-between; align-items:center; gap:8px; }
   .post-detail .meta .prow-meta { margin:0; }
+  .nd { display:inline-flex; align-items:center; gap:6px; flex-wrap:wrap; justify-content:flex-end; text-align:right; }
   .post-detail h1 { font-size:clamp(20px, 6vw, 24px); line-height:1.3; margin:10px 0 12px; text-wrap:balance; }
   .pd-body { margin:0; white-space:pre-wrap; white-space-collapse:preserve-breaks; word-break:keep-all;
              overflow-wrap:break-word; font-size:15.5px; line-height:1.75; text-wrap:pretty; }
@@ -912,11 +915,13 @@ function byHeader(rows) {
   const pick = (r, ...kws) => { for (const kw of kws) for (const i of colsOf(kw)) if (has(r[i])) return r[i].trim(); return ""; };
   return { data, pick };
 }
-// 링크가 있으면 시트에서, 없으면 예시 데이터 (아무 시트도 연결 안 했을 때만)
-const ANY_SHEET = LOWER_CSV_URL || UPPER_CSV_URL;
-const source = (url, sample) => url ? fetchRows(url).catch(() => []) : Promise.resolve(ANY_SHEET ? [] : sample);
+// 시트 읽기 (링크가 없으면 빈 목록)
+const source = url => url ? fetchRows(url).catch(() => []) : Promise.resolve([]);
+const sourceH = url => url ? fetchRows(url, true).catch(() => []) : Promise.resolve([]);
 const REVIEW_HEADER = ["타임스탬프", "단과대·학년", "후기 종류", "과목명", "별점", "후기 내용", "꿀팁", "닉네임"];
-const sourceH = (url, sample) => url ? fetchRows(url, true).catch(() => []) : Promise.resolve(ANY_SHEET ? [] : [REVIEW_HEADER, ...sample]);
+// 실제 글이 SAMPLE_UNTIL개보다 적으면 뒤에 예시 글을 붙여요
+const mix = (real, samples) => real.length >= SAMPLE_UNTIL ? real
+  : [...real, ...samples.map(x => ({ ...x, sample: true, id: x.id === undefined ? undefined : "s" + x.id }))];
 const cleanDate = s => (s || "").split(/\s+(오전|오후|\d+:)/)[0].trim();
 const toRating = s => Math.min(5, Math.max(0, parseFloat((s || "").replace(/[^\d.]/g, "")) || 0));
 const linkify = s => esc(s).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
@@ -929,12 +934,10 @@ function photoURL(s) {
 
 async function load() {
   const [lRows, uRows, eRows, xRows, pRows, iRows, gRows, prRows] = await Promise.all([
-    sourceH(LOWER_CSV_URL, SAMPLE_LOWER), sourceH(UPPER_CSV_URL, SAMPLE_UPPER),
-    source(ELECTIVE_CSV_URL, SAMPLE_ELECTIVE), source(EXAM_CSV_URL, SAMPLE_EXAM),
-    source(PROMO_CSV_URL, SAMPLE_PROMO), source(INFO_CSV_URL, SAMPLE_INFO), source(GRAD_CSV_URL, SAMPLE_GRAD),
-    PRACTICE_CSV_URL ? fetchRows(PRACTICE_CSV_URL, true).catch(() => []) : Promise.resolve(ANY_SHEET ? [] : [PRACTICE_HEADER, ...SAMPLE_PRACTICE]),
+    sourceH(LOWER_CSV_URL), sourceH(UPPER_CSV_URL), source(ELECTIVE_CSV_URL), source(EXAM_CSV_URL),
+    source(PROMO_CSV_URL), source(INFO_CSV_URL), source(GRAD_CSV_URL), sourceH(PRACTICE_CSV_URL),
   ]);
-  usingSample = !ANY_SHEET;
+  usingSample = false;
   const gradeNum = s => parseInt((s || "").replace(/\D/g, "")) || 0;
 
   // 학년 폼(1~3, 4학년 이상): 질문 제목으로 읽어요 — 단과대·학년, 후기 종류, 과목명(섹션마다), 별점, 후기 내용, 꿀팁, 닉네임
@@ -947,50 +950,64 @@ async function load() {
         kind: gradExam ? "F" : kindOf(pick(r, "종류")), subject: gradExam ? "" : pick(r, "과목명"),
         rating: toRating(pick(r, "별점")), body: pick(r, "후기내용", "내용"), tip: pick(r, "꿀팁"), nick: pick(r, "닉네임"),
       };
-    }).filter(x => x.grade && (x.subject || x.kind === "F"));
+    }).filter(x => x.grade && (x.subject || x.kind === "F")).reverse();
   };
-  const lower = gradeRows(lRows);
-  const upper = gradeRows(uRows);
-  const main = [...lower, ...upper];
-  // Elective 폼 (의치약 공통): 타임스탬프, 후기 종류, 과목명, 별점, 후기 내용, 꿀팁
   // 실습후기: 질문 제목으로 읽기
-  {
-    const { data, pick } = byHeader(prRows);
-    practices = data.map(r => {
+  const practiceRows = rows => {
+    const { data, pick } = byHeader(rows);
+    return data.map(r => {
       const c = collegeOf(pick(r, "단과대")), t = pick(r, "종류");
       return {
         date: cleanDate(r[0]), college: c, type: practiceOf(c, t), place: pick(r, "장소"), when: pick(r, "시기"),
         rating: toRating(pick(r, "별점")), body: pick(r, "후기내용", "내용"), tip: pick(r, "꿀팁"), nick: pick(r, "닉네임"),
       };
     }).filter(x => x.type && (has(x.body) || x.rating)).reverse();
-  }
-  const elec = eRows.filter(r => has(r[2])).map(r => ({
+  };
+  // Elective 폼 (의치약 공통): 타임스탬프, 후기 종류, 과목명, 별점, 후기 내용, 꿀팁, 닉네임
+  const electiveRows = rows => rows.filter(r => has(r[2])).map(r => ({
     date: cleanDate(r[0]), college: "공통", grade: "E", kind: kindOf(r[1]),
     subject: r[2].trim().replace(/\s+/g, " "), rating: toRating(r[3]), body: r[4], tip: r[5], nick: r[6],
-  }));
-  reviews = [...main, ...elec].reverse();
-  // 시험후기: 타임스탬프, 단과대, 종류, 시기, 난이도, 공부법, 후기, 꿀팁
-  exams = xRows.filter(r => has(r[2])).map(r => ({
+  })).reverse();
+  // 시험후기: 타임스탬프, 단과대, 종류, 시기, 난이도, 공부법, 후기, 꿀팁, 닉네임
+  const examRows = rows => rows.filter(r => has(r[2])).map(r => ({
     date: cleanDate(r[0]), college: collegeOf(r[1]), type: /국/.test(r[2]) ? "국시" : "예비시험",
     when: r[3], diff: toRating(r[4]), study: r[5], review: r[6], tip: r[7], nick: r[8],
   })).reverse();
   // 홍보: 타임스탬프, 분류, 제목, 내용, 연락처
-  const isSample = url => !url && !ANY_SHEET;
-  promos = pRows.map((r, i) => [r, i]).filter(([r]) => has(r[2]) || has(r[3])).map(([r, i]) => ({
-    id: i, date: cleanDate(r[0]), cat: (r[1] || "기타").trim(), title: r[2], body: r[3], contact: r[4], sample: isSample(PROMO_CSV_URL),
+  const promoRows = rows => rows.map((r, i) => [r, i]).filter(([r]) => has(r[2]) || has(r[3])).map(([r, i]) => ({
+    id: i, date: cleanDate(r[0]), cat: (r[1] || "기타").trim(), title: r[2], body: r[3], contact: r[4],
   })).reverse();
   // 정보: 타임스탬프, 제목, 내용, 링크, 사진, (고정) — 고정글 먼저, 나머지는 최신순
-  const info = iRows.map((r, i) => [r, i]).filter(([r]) => has(r[1])).map(([r, i]) => ({
-    id: i, date: cleanDate(r[0]), title: r[1], body: r[2], link: r[3], pin: has(r[5]), sample: isSample(INFO_CSV_URL),
-    photos: (r[4] || "").split(/[\s,]+/).filter(Boolean).map(photoURL),
-  })).reverse();
-  infos = [...info.filter(x => x.pin), ...info.filter(x => !x.pin)];
+  const infoRows = rows => {
+    const info = rows.map((r, i) => [r, i]).filter(([r]) => has(r[1])).map(([r, i]) => ({
+      id: i, date: cleanDate(r[0]), title: r[1], body: r[2], link: r[3], pin: has(r[5]),
+      photos: (r[4] || "").split(/[\s,]+/).filter(Boolean).map(photoURL),
+    })).reverse();
+    return [...info.filter(x => x.pin), ...info.filter(x => !x.pin)];
+  };
   // 졸업생: 타임스탬프, 단과대, 졸업 연도, 분류, 제목, 내용, 연락처
-  grads = gRows.map((r, i) => [r, i]).filter(([r]) => has(r[4]) || has(r[5])).map(([r, i]) => ({
-    id: i, date: cleanDate(r[0]), college: collegeOf(r[1]), year: (r[2] || "").trim(), cat: (r[3] || "기타").trim(), title: r[4], body: r[5], contact: r[6], sample: isSample(GRAD_CSV_URL),
+  const gradRows = rows => rows.map((r, i) => [r, i]).filter(([r]) => has(r[4]) || has(r[5])).map(([r, i]) => ({
+    id: i, date: cleanDate(r[0]), college: collegeOf(r[1]), year: (r[2] || "").trim(), cat: (r[3] || "기타").trim(),
+    title: r[4], body: r[5], contact: r[6],
   })).reverse();
+
+  // 실제 글 + (적을 때만) 예시 글
+  reviews = [
+    ...mix(gradeRows(lRows), gradeRows([REVIEW_HEADER, ...SAMPLE_LOWER])),
+    ...mix(gradeRows(uRows), gradeRows([REVIEW_HEADER, ...SAMPLE_UPPER])),
+    ...mix(electiveRows(eRows), electiveRows(SAMPLE_ELECTIVE)),
+  ];
+  practices = mix(practiceRows(prRows), practiceRows([PRACTICE_HEADER, ...SAMPLE_PRACTICE]));
+  exams = mix(examRows(xRows), examRows(SAMPLE_EXAM));
+  promos = mix(promoRows(pRows), promoRows(SAMPLE_PROMO));
+  infos = mix(infoRows(iRows), infoRows(SAMPLE_INFO));
+  grads = mix(gradRows(gRows), gradRows(SAMPLE_GRAD));
   loaded = true;
   route();
+  // 이 기기에서 처음 들어왔을 때만 이용안내를 한 번 띄워요
+  let seen = false;
+  try { seen = localStorage.getItem("guideSeen") === "1"; localStorage.setItem("guideSeen", "1"); } catch (e) { seen = true; }
+  if (!seen) openGuide();
 }
 
 function withParams(base, params) {
@@ -1030,7 +1047,7 @@ function bindHeader() {
   });
 }
 // 닉네임(선택): 있으면 날짜 앞에 작게
-const nickDate = x => `<span class="muted">${has(x.nick) ? `<span class="nick">${esc(x.nick.trim().slice(0, 20))}</span> · ` : ""}${esc(x.date)}</span>`;
+const nickDate = x => `<span class="nd">${x.sample ? '<span class="sample-badge">예시</span>' : ""}<span class="muted">${has(x.nick) ? `<span class="nick">${esc(x.nick.trim().slice(0, 20))}</span> · ` : ""}${esc(x.date)}</span></span>`;
 const sampleBadge = x => x.sample ? '<span class="sample-badge">예시</span>' : "";
 // 후기 화면 공통 배너 — 항상 보이고, 시트 연결 전에는 예시 안내가 작게 붙어요
 const honeyBanner = () => `<div class="notice honey"><b>🍯 꿀팁은 나눌수록 커져요</b></div>`;
@@ -1422,7 +1439,7 @@ function renderGrad() {
 function route() {
   const m = location.hash.match(/^#(?:c=([^&]+)&)?g=(\d|E)&(?:k=([RMCEF])&)?s=(.+)$/);
   const v = location.hash.match(/^#v=(\w+)$/);
-  const pp = location.hash.match(/^#post=(promo|info|grad)&id=(\d+)$/);
+  const pp = location.hash.match(/^#post=(promo|info|grad)&id=(s?\d+)$/);
   if (pp) { renderPost(pp[1], pp[2]); return; }
   const gx = location.hash.match(/^#c=([^&]+)&gradexam$/);
   if (gx) {
