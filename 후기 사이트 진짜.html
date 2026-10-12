@@ -1,0 +1,1489 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Semmelweis · SKA 한인학생회</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<script>
+  /* ======================================================
+     ✏️ 설정은 여기서만 고치면 돼요! (따옴표 안에 붙여넣기)
+     ====================================================== */
+  // ── 1~3학년 후기 폼 & 시트
+  //    섹션1: "단과대·학년"(의대 1학년 … 약대 3학년, 고르면 그 학년 과목 섹션으로 이동) + "후기 종류"(수강후기 / Exam / Midterm / Competition)
+  //    과목 섹션들: 각각 "과목명" 드롭다운 하나 → 다 끝나면 마지막 섹션으로
+  //    마지막 섹션: 별점 → 후기 내용 → 꿀팁 → 닉네임(선택)
+  //    ※ 사이트는 질문 '제목'으로 읽어요. 제목에 단과대 / 학년 / 종류 / 과목명 / 별점 / 내용 / 꿀팁 / 닉네임이 들어가게 해주세요
+  const LOWER_CSV_URL = "";      // 시트 '웹에 게시' → CSV 링크 (비워두면 예시 후기가 보여요)
+  const LOWER_FORM_URL = "";
+  const LOWER_COLLEGE_GRADE_ENTRY = "";  // (선택) 미리 채워진 링크의 "단과대·학년" 칸 번호 (예: "entry.123456789")
+  const LOWER_KIND_ENTRY = "";
+
+  // ── 4학년 이상 후기 폼 & 시트 (의대 4~6학년, 치대·약대 4~5학년)
+  //    1~3학년 폼과 같은 구조. "단과대·학년"은 의대 4·5·6학년 / 치대 4·5학년 / 약대 4·5학년 + "의대 6학년 졸업시험"
+  //    "의대 6학년 졸업시험"을 고르면 과목 섹션을 건너뛰고 바로 마지막 섹션(별점·후기)으로 가게 해주세요
+  //    그래서 이 폼은 "후기 종류"(수강후기 / Exam)를 섹션1이 아니라 각 과목 섹션 안에 넣어요
+  const UPPER_CSV_URL = "";
+  const UPPER_FORM_URL = "";
+  const UPPER_COLLEGE_GRADE_ENTRY = "";
+  const UPPER_KIND_ENTRY = "";
+  // 사이트 제목
+  const SITE_TITLE = "Semmelweis University";
+  const SITE_SUBTITLE = "SKA 한인학생회";
+  // 건의사항 & 오류 신고 버튼 링크
+  const FEEDBACK_FORM_URL = "";   // 오픈카톡 링크 (예: https://open.kakao.com/o/xxxx)
+
+  // Elective 전용 구글폼 & 시트 (과목명은 '단답형'으로 자유롭게 쓰게)
+  // Elective는 의대 · 치대 · 약대 공통이라 단과대 질문이 없어요
+  // 폼 순서: 후기 종류(수강후기 / Exam) → 과목명 → 별점 → 후기 내용 → 꿀팁 → 닉네임(선택)
+  const ELECTIVE_CSV_URL = "";
+  const ELECTIVE_FORM_URL = "";
+  const ELECTIVE_KIND_ENTRY = "";
+  const ELECTIVE_SUBJECT_ENTRY = "";   // (선택) 미리 채워진 링크의 과목명 칸 번호
+
+  // 국시 · 예비시험 후기 폼 & 시트
+  // 폼 순서: 단과대(의대 / 치대 / 약대) → 시험 종류(객관식: 예비시험 / 국시) → 응시 시기 → 난이도(1~5) → 공부 방법·자료 → 시험 후기 → 꿀팁 → 닉네임(선택)
+  const EXAM_CSV_URL = "";
+  const EXAM_FORM_URL = "";
+  const EXAM_COLLEGE_ENTRY = "";  // (선택) 미리 채워진 링크의 단과대 칸 번호
+  const EXAM_TYPE_ENTRY = "";   // (선택) 미리 채워진 링크의 시험 종류 칸 번호
+
+  // 홍보 게시판 폼 & 시트
+  // 폼 순서: 분류(동아리/스터디/과외 객관식) → 제목 → 내용 → 연락처
+  const PROMO_CSV_URL = "";
+  const PROMO_FORM_URL = "";
+
+  // 자료 링크 — ["보이는 이름", "주소"] 형식으로 여러 개 추가 가능
+  const DRIVE_LINKS = [
+    ["스카 드라이브 자료", ""],   // 따옴표 안에 구글 드라이브 폴더 링크 붙여넣기
+  ];
+
+  // ── 실습후기 폼 & 시트 (질문 제목으로 읽어요)
+  //    단과대(의대 / 치대 / 약대) → 실습 종류(아래 PRACTICES 이름 + "기타 실습") → 실습 장소(병원·도시, 단답)
+  //    → 실습 시기(예: 2026 여름, 단답) → 별점 → 후기 내용 → 꿀팁 → 닉네임(선택)
+  const PRACTICE_CSV_URL = "";
+  const PRACTICE_FORM_URL = "";
+  const PRACTICE_COLLEGE_ENTRY = "";  // (선택) 미리 채워진 링크의 단과대 칸 번호
+  const PRACTICE_TYPE_ENTRY = "";     // (선택) 미리 채워진 링크의 실습 종류 칸 번호
+
+  // 단과대별 필수 실습 — [이름(폼 선택지와 똑같이), 학년, 설명]
+  const PRACTICES = {
+    "의대": [
+      ["Nursing", "1·2학년", "간호 실습 · 병동 기본 업무"],
+      ["Internal Medicine", "3학년", "내과 실습"],
+      ["Surgery", "4학년", "외과 실습"],
+    ],
+    "치대": [
+      ["Dental Assistance & Dental Laboratory Summer Practice", "1학년", ""],
+      ["Dento-Alveolar Summer Practice", "3학년", ""],
+      ["General Dentistry Summer Practice", "4학년", ""],
+    ],
+    "약대": [
+      ["Summer Practice", "", "여름 실습"],
+      ["Pharmacy Practice", "", "약국 실습 (Pharmacy Practice I · II)"],
+    ],
+  };
+  // 모든 단과대 공통 '기타 실습' 칸의 설명
+  const PRACTICE_OTHER_DESC = "서브인턴, 한국 · 미국 · 독일 등 국내외 병원 실습";
+
+  // 졸업생 게시판 폼 & 시트
+  // 폼 순서: 단과대(의대 / 치대 / 약대) → 졸업 연도 → 분류(진로 / 취업·병원 / 기타) → 제목 → 내용 → 연락처(선택)
+  const GRAD_CSV_URL = "";
+  const GRAD_FORM_URL = "";
+  const GRAD_COLLEGE_ENTRY = "";   // (선택) 미리 채워진 링크의 단과대 칸 번호
+
+  // 정보 게시판 폼 & 시트 (누구나 작성)
+  // 폼 순서: 제목 → 내용 → 링크(선택) → 사진(파일 업로드, 선택)
+  // 고정하고 싶은 글은 응답 시트 맨 오른쪽에 '고정' 열을 직접 만들고 아무 글자나 쓰면 맨 위에 고정돼요
+  const INFO_CSV_URL = "";
+  const INFO_FORM_URL = "";
+
+  /* ======================================================
+     📖 이용안내 내용 — 아래 ` 사이에 자유롭게 쓰세요
+     # 로 시작하면 소제목, - 로 시작하면 목록, 빈 줄은 문단 구분
+     ====================================================== */
+  const GUIDE = `
+SKA 한인학생회 선후배가 함께 후기와 정보를 나누는 공간이에요.
+후기 하나가 누군가의 다음 학기를 바꿔요 🙂
+
+# 과목후기 보기
+- 의대 · 치대 · 약대를 고른 뒤 학년과 과목을 누르세요
+- 의대는 6학년, 치대 · 약대는 5학년까지 있어요
+- 과목 안에서 수강후기 / Exam / Midterm / Competition 을 골라 볼 수 있어요
+- Midterm · Competition 은 1~3학년 과목에만 있어요
+- 의대 6학년에는 과목과 별개로 '졸업시험 후기'가 맨 위에 있어요
+- 검색창에 과목명 일부만 쳐도 찾아져요
+
+# 후기 쓰기
+- 오른쪽 아래 '쓰기' 버튼을 누르면 구글폼으로 이동해요
+- 과목 안에서 누르면 학년 · 과목 · 후기 종류가 미리 입력돼요
+- 제출한 후기는 몇 분 뒤에 사이트에 반영돼요
+- 출석, 시험 형식, 공부량처럼 구체적으로 쓸수록 큰 도움이 돼요
+- 닉네임은 선택이에요. 적으면 후기 옆에 작게 보여요
+- 학기말에 후기를 많이 남긴 닉네임을 뽑아 작은 선물을 드려요 🎁
+
+# 열람코드
+- 후기 내용은 열람코드가 있어야 볼 수 있어요
+- 과목 · 실습 · 국시·예비시험 후기를 1개 작성하면 공통 열람코드를 받을 수 있어요
+- 한 번 입력하면 그 기기에서는 계속 열려 있어요
+- 코드는 매 학기 바뀌어요
+
+# Elective
+- 과목명을 직접 적어 주세요
+- 의대 · 치대 · 약대 공통이라 어느 단과대에서 봐도 같은 목록이에요
+- 대소문자 · 띄어쓰기는 달라도 같은 과목으로 모여요 (모든 과목 공통)
+- 이미 있는 과목은 그 과목 안에서 쓰면 이름이 자동으로 들어가요
+
+# 실습후기
+- 단과대를 고르면 필수 실습별로 후기를 볼 수 있어요 (의대: Nursing 1·2학년, Internal Medicine 3학년, Surgery 4학년)
+- 서브인턴, 한국 · 미국 · 독일 등 국내외 실습은 '기타 실습'에 모여요
+- 실습 장소와 시기를 같이 적어 주면 큰 도움이 돼요
+
+# 국시 · 예비시험
+- 단과대를 고른 뒤 예비시험 / 국시 탭에서 응시 시기, 난이도, 공부 방법을 볼 수 있어요
+
+# 게시판
+- 졸업생: 단과대별 선배들의 진로 · 취업 이야기
+- 홍보: 동아리 · 스터디 · 과외 모집글
+- 정보: 학교생활 알짜 정보, 사진도 올릴 수 있어요
+- 스카 드라이브 자료는 과목후기 화면 위쪽에 있어요
+
+# 함께 지켜요
+- 모든 후기와 글은 익명이에요
+- 교수님 · 학생 실명, 연락처 같은 개인정보는 적지 말아 주세요
+- 비방이나 근거 없는 소문은 운영진이 삭제할 수 있어요
+- 비밀번호 · 열람코드 · 링크는 우리 학생끼리만 공유해 주세요
+- 시험 문제 원문 그대로 올리는 것은 피해 주세요
+
+# 문의
+- 없는 과목, 오류, 건의사항은 맨 아래 버튼을 누르면 운영자 오픈카톡으로 연결돼요
+- 접속이 안 되는 문제는 바로 확인하고, 그 외 건의는 매주 수요일 · 주말에 한 번에 반영해요
+`;
+  // 후기 열람코드 (암호화된 값) — 구글폼 '확인 메시지'에 이 코드를 적어두세요
+  // 과목후기 내용과 국시·예비시험 후기를 볼 때만 물어봐요
+  const VIEW_CODE_HASH = "682c8aa1169a238ec19448dbcdd293d641d489752611a9dbf18c5f037221d0fb";
+  // 입장 비밀번호 (암호화된 값. 4학년 사이트와 같은 비번이에요)
+  const PASSWORD_HASH = "37d670ec7b58080cdb3fb123417d693b3ec4fe9beb50c431f161a4b5c4b5610e";
+
+  // 단과대 · 학년별 과목 목록 — 따옴표로 감싸고 쉼표로 구분해서 추가하세요
+  // (구글폼 드롭다운과 철자까지 똑같이!)  의대는 6학년, 치대·약대는 5학년까지
+  // 실습(Summer Practice, Pharmacy Practice 등)은 여기 말고 아래 PRACTICES에 있어요
+  const SUBJECTS = {
+    "의대": {
+      1: [
+        "Cell Science",
+        "Medical Chemistry",
+        "Macroscopic Anatomy and Embryology I",
+        "Medical Biophysics I",
+        "Medical Terminology",
+        "Medical Communication",
+        "Medical Hungarian I",
+        "History of Medicine and Semmelweis University",
+        "Artificial Intelligence as a Learning Tool",
+        "Medical Biochemistry I",
+        "Macroscopic Anatomy and Embryology II",
+        "Microscopic Anatomy and Embryology I",
+        "Medical Biophysics II",
+        "Introduction to Patient Care",
+        "Medical Hungarian II",
+        "First Aid",
+      ],
+      2: [
+        "Microscopic Anatomy and Embryology II",
+        "Medical Physiology I",
+        "Medical Biochemistry II",
+        "Molecular Cell Biology I",
+        "Medical Genetics and Immunology I",
+        "Medical Psychology",
+        "Medical Sociology",
+        "Introduction to Clinical Medicine",
+        "Medical Hungarian III",
+        "Medical Microbiology I",
+        "Medical Physiology II",
+        "Molecular Cell Biology II",
+        "Medical Genetics and Immunology II",
+        "Medical Hungarian IV",
+      ],
+      3: [
+        "Pharmacology I",
+        "Medical Microbiology II",
+        "Pathology I",
+        "Clinical Pathophysiology I",
+        "Internal Medicine – Propedeutics",
+        "Medical Statistics, Informatics and Telemedicine",
+        "Clinical ECG",
+        "Pharmacology II",
+        "Pathology II",
+        "Clinical Pathophysiology II",
+        "Basic Surgical Techniques",
+        "Medical Ethics, Bioethics and Medical Law",
+      ],
+      4: [
+        "Surgery",
+        "Family Medicine",
+        "Cardiology, Heart Surgery, Angiology, Vascular Surgery",
+        "Ophthalmology",
+        "Otorhinolaryngology",
+        "Dermatology",
+        "Emergency Medicine and Oncology",
+        "Oral Surgery",
+        "Traumatology and Orthopedics",
+        "Internal Medicine I.",
+        "Pulmonology – Thoracic Surgery",
+        "Medical Imaging",
+        "Disaster Medicine",
+        "Clinical Pharmacology",
+        "Laboratory Medicine",
+      ],
+      5: [
+        "Internal Medicine II (Hematology, Infectology, Immunology, Rheumatology, Laboratory Medicine)",
+        "Forensic Medicine",
+        "Obstetrics and Gynaecology",
+        "Pediatrics",
+        "Urology",
+        "Oncology",
+        "Intensive Therapy and Anaesthesiology",
+        "Neurology and Neurosurgery",
+        "Psychiatry and Psychotherapy",
+        "Sports Medicine",
+        "Clinical Genetics",
+        "Medical Rehabilitation",
+        "Public Health",
+      ],
+      6: [
+        "Internal Medicine (incl. 1 week Infectology and 1 week Family Medicine)",
+        "Surgery (incl. 1 week Vascular Surgery, 1 week Traumatology)",
+        "Pediatrics",
+        "Obstetrics and Gynecology",
+        "Neurology",
+        "Psychiatry",
+        "Prehospital Emergency Medicine",
+        "Transfusion",
+        "Six-week Facultative Course",
+      ],
+    },
+    "치대": {
+      1: [
+        "Macroscopic Anatomy and Embryology I",
+        "Biophysics I",
+        "Physical Foundations of Dental Materials Science",
+        "Cell Science",
+        "Medical Chemistry",
+        "Macroscopic Anatomy and Embryology II",
+        "Microscopic Anatomy and Embryology I",
+        "Biophysics II",
+        "General Dental Materials",
+        "Dental Biochemistry I",
+        "Hungarian for Dental Medical Purposes I",
+        "First Aid",
+      ],
+      2: [
+        "Microscopic Anatomy and Embryology II",
+        "Dental Biochemistry II",
+        "Basic Immunology",
+        "Molecular Cell Biology I",
+        "Odontotechnology and Prosthodontics Pre-clinical I",
+        "Medical and Dental Physiology I",
+        "General Dental Preclinical Practice",
+        "Hungarian for Dental Medical Purposes II",
+        "General and Oral Microbiology",
+        "Genetics and Genomics",
+        "Restorative Dentistry, Pre-clinical I",
+        "Molecular Cell Biology II",
+        "Odontotechnology and Prosthodontics Pre-clinical II",
+        "Medical and Dental Physiology II",
+        "Hungarian for Dental Medical Purposes III",
+      ],
+      3: [
+        "General and Oral Pathophysiology",
+        "Medical Aspects of Disaster Preparedness and Response I",
+        "Restorative Dentistry, Pre-clinical II",
+        "Public Health",
+        "Odontotechnology and Prosthodontics Pre-clinical III",
+        "Pathology",
+        "Preventive Dentistry",
+        "Oral and Maxillofacial Surgery, Pre-clinical Course",
+        "Hungarian for Dental Medical Purposes IV",
+        "Restorative Dentistry, Pre-clinical III",
+        "Prosthodontics I",
+        "Restorative Dentistry and Endodontics I",
+        "Medical Aspects of Disaster Preparedness and Response II",
+        "Oral Biology",
+        "Oral Pathology",
+        "Oral and Maxillofacial Surgery I",
+        "Oral Medicine I",
+        "Oral Diagnostics",
+        "Radiation Protection",
+        "Hungarian for Dental Medical Purposes V",
+      ],
+      4: [
+        "Internal Medicine I",
+        "Prosthodontics II",
+        "Pharmacology I",
+        "Restorative Dentistry and Endodontics II",
+        "Medical Aspects of Disaster Preparedness and Response III",
+        "Periodontology I",
+        "Emergency Dentistry I",
+        "Oral and Maxillofacial Surgery II",
+        "General and Dental Radiology I",
+        "Gnathology",
+        "Thesis I – Thesis Topic Selection",
+        "Internal Medicine II",
+        "Prosthodontics III",
+        "Orthodontics Pre-clinical",
+        "Pharmacology II",
+        "Implantology I",
+        "Restorative Dentistry and Endodontics III",
+        "Medical Aspects of Disaster Preparedness and Response IV",
+        "Periodontology II",
+        "Emergency Dentistry II",
+        "Oral and Maxillofacial Surgery III",
+        "General and Dental Radiology II",
+        "Thesis II – Formal Requirements of the Thesis",
+      ],
+      5: [
+        "Prosthodontics IV",
+        "Orthodontics I",
+        "Pedodontics I",
+        "Implantology II",
+        "Clinical Dentistry I",
+        "Restorative Dentistry and Endodontics IV",
+        "Oral Medicine II",
+        "Periodontology III",
+        "Oral and Maxillofacial Surgery IV",
+        "Thesis III – Consultations and Thesis Writing",
+        "Prosthodontics V",
+        "Orthodontics II",
+        "Gerostomatology",
+        "Pedodontics II",
+        "Clinical Dentistry II",
+        "Restorative Dentistry and Endodontics V",
+        "Periodontology IV",
+        "Oral and Maxillofacial Surgery V",
+        "Thesis IV – Content and Formal Requirements of the Thesis",
+      ],
+    },
+    "약대": {
+      1: [
+        "General Chemistry",
+        "Informatics and artificial intelligence",
+        "Physics for Pharmacist",
+        "Cell Biology",
+        "First Aid",
+        "The Latin basics of pharmaceutical terminology",
+        "Mathematics for Pharmacists",
+        "Pharmaceutical Propedeutics",
+        "History of Pharmacy and Semmelweis University",
+        "Basic Communication",
+        "Hungarian Pharmaceutical Terminology I.",
+        "Inorganic Chemistry",
+        "Organic Chemistry I.",
+        "Anatomy",
+        "Pharmaceutical Biophysics",
+        "Genetics",
+        "Pharmaceutical and medical terminology",
+        "Basics of Economics",
+        "Physical Chemistry for Pharmacists",
+        "Hungarian Pharmaceutical Terminology II.",
+      ],
+      2: [
+        "Analytical Chemistry I.",
+        "Biochemistry I.",
+        "Physiology I.",
+        "Colloid Chemistry",
+        "Organic Chemistry II.",
+        "Hungarian Pharmaceutical Terminology III.",
+        "Biochemistry II.",
+        "Analytical Chemistry II.",
+        "Pharmaceutical dosage forms",
+        "Physiology II.",
+        "Basic Immunology (theory)",
+        "Nanotechnology",
+        "Hungarian Pharmaceutical Terminology IV.",
+      ],
+      3: [
+        "Pharmaceutical Botany",
+        "Dietetics",
+        "Biotechnology",
+        "Pharmaceutical Technology I.",
+        "Introduction to Industrial Pharmaceutics",
+        "Pharmaceutical Chemistry and Analysis I.",
+        "Pharmaceutical Microbiology",
+        "Basic Medical Pathophysiology I.",
+        "Clinical Chemistry and Laboratory Diagnostics",
+        "Products of Veterinary Medicine",
+        "Basic Medical Pathophysiology II.",
+        "Pharmacognosy I.",
+        "Pharmaceutical Chemistry and Analysis II.",
+        "Pharmacology and Toxicology I.",
+        "Pharmaceutical Technology II.",
+        "Statistics for Pharmacists",
+      ],
+      4: [
+        "Pharmacognosy II.",
+        "Quality Control and Analysis of Drugs",
+        "Pharmacology and Toxicology II.",
+        "Pharmaceutical Technology III.",
+        "Biological Drugs",
+        "Pharmacy Administration I.",
+        "Pharmacoeconomics",
+        "Pharmacology and Toxicology III.",
+        "Pharmaceutical Technology IV.",
+        "Pharmacy Administration II.",
+        "Public Health",
+        "Integrated Consulting",
+        "Phytotherapy",
+      ],
+      5: [
+        "Compulsory Practice Before the Board Exam I.",
+        "Drug Therapy",
+        "Pharmaceutical Care",
+        "Clinical Pharmacokinetics and Biopharmacy",
+        "Pharmaceutical informatics",
+        "Pharmaceutical management",
+        "Clinical Pharmaceutics",
+        "Pharmaceutical Ethics and Sociology",
+        "Collaborative pharmacotherapy and interprofessional therapy management",
+        "Drug Licensing",
+        "Pharmacovigilance and pharmacoepidemiology",
+        "Quality Assurance",
+        "Druginnovation and clinical examinations",
+        "Compulsory Practice Before the Board Exam (4 months) II.",
+        "Diploma Defence",
+      ],
+    },
+  };
+</script>
+<style>
+  :root {
+    --bg: #f6f7fb; --card: #ffffff; --text: #1d1f26; --sub: #6b7080;
+    --line: #e6e8ef; --accent: #4f6bed; --accent-soft: #eef1fe; --star: #f5b301;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14161c; --card:#1e2129; --text:#eceef3; --sub:#9aa0ae;
+            --line:#2c303a; --accent:#7d93ff; --accent-soft:#262d4a; --star:#ffc93c; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+         font-family:Pretendard, -apple-system, sans-serif; line-height:1.55; }
+  .wrap { max-width:720px; margin:0 auto; padding:24px 16px 80px; }
+  h1 { font-size:24px; margin:8px 0 4px; }
+  h1 .sub { display:block; font-size:.8em; font-weight:600; color:var(--accent); margin-top:2px; }
+  .muted { color:var(--sub); font-size:14px; }
+  .search { width:100%; padding:13px 16px; margin:14px 0 18px; font-size:16px;
+            border:1px solid var(--line); border-radius:12px;
+            background:var(--card); color:var(--text); outline:none; }
+  .search:focus { border-color:var(--accent); }
+  .tabs { display:grid; grid-template-columns:repeat(6,1fr); gap:6px; margin-top:18px; }
+  .tab { border:1px solid var(--line); background:var(--card); color:var(--text);
+         border-radius:10px; padding:9px 0; font-size:14px; font-weight:600;
+         cursor:pointer; font-family:inherit; }
+  .tab.on { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .tab.wide { grid-column:1/-1; }
+  .topbar { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+  .guide-btn { flex:none; margin-top:12px; background:var(--card); color:var(--sub);
+               border:1px solid var(--line); border-radius:20px; padding:6px 13px;
+               font-size:13px; font-family:inherit; cursor:pointer; }
+  .guide-btn:hover { color:var(--accent); border-color:var(--accent); }
+  .pills { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:12px; }
+  .pills .guide-btn, .pills .feedback { margin:0; width:auto; border:1px solid var(--line); background:var(--card); }
+  .subject.elective b { font-size:21px; line-height:1.3; margin-bottom:8px; }
+  h1.elective { font-size:30px; line-height:1.25; }
+  .modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.45); display:flex;
+              align-items:flex-end; justify-content:center; z-index:10; }
+  .modal { background:var(--card); width:100%; max-width:560px; max-height:85vh; overflow-y:auto;
+           border-radius:20px 20px 0 0; padding:22px 20px 28px; }
+  @media (min-width:600px) { .modal-bg { align-items:center; } .modal { border-radius:20px; } }
+  .modal-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+  .modal-head h2 { margin:0; font-size:20px; }
+  .x { background:none; border:none; color:var(--sub); font-size:24px; cursor:pointer; line-height:1; }
+  .modal h3 { font-size:15px; color:var(--accent); margin:20px 0 6px; }
+  .modal ul { margin:0; padding-left:18px; }
+  .modal li { margin:4px 0; font-size:15px; }
+  .modal p { margin:6px 0; font-size:15px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:12px; }
+  .subject { background:var(--card); border:1px solid var(--line); border-radius:14px;
+             padding:16px; cursor:pointer; transition:transform .12s, border-color .12s; }
+  .subject:hover { transform:translateY(-2px); border-color:var(--accent); }
+  .subject b { display:block; font-size:17px; margin-bottom:6px; }
+  .stars { color:var(--star); letter-spacing:1px; }
+  .back { background:none; border:none; color:var(--accent); font-size:15px;
+          padding:0; cursor:pointer; font-family:inherit; }
+  .head { display:flex; justify-content:space-between; align-items:flex-end;
+          gap:12px; flex-wrap:wrap; margin:12px 0 18px; }
+  .pill { display:inline-block; background:var(--accent-soft); color:var(--accent);
+          font-size:12px; font-weight:700; padding:3px 9px; border-radius:20px; }
+  .big { font-size:30px; font-weight:700; }
+  .btn { display:inline-block; background:var(--accent); color:#fff; text-decoration:none;
+         padding:11px 18px; border-radius:11px; font-weight:600; font-size:15px; }
+  .review { background:var(--card); border:1px solid var(--line); border-radius:14px;
+            padding:16px; margin-bottom:12px; }
+  .review .top { display:flex; justify-content:space-between; margin-bottom:8px; }
+  .tag { display:inline-block; background:var(--accent-soft); color:var(--accent);
+         font-size:12px; font-weight:700; padding:2px 8px; border-radius:6px; margin:8px 0 3px; }
+  .review p { margin:0; white-space:pre-wrap; word-break:break-word; }
+  .empty { text-align:center; padding:40px 0; color:var(--sub); grid-column:1/-1; }
+  .notice { background:var(--accent-soft); color:var(--accent); padding:10px 14px;
+            border-radius:10px; font-size:13px; margin-top:14px; }
+  .lock { max-width:340px; margin:18vh auto 0; text-align:center; }
+  .lock .emoji { font-size:42px; }
+  .lock h1 { font-size:21px; }
+  .lock button { width:100%; border:none; cursor:pointer; font-family:inherit; }
+  .err { color:#e5484d; font-size:14px; min-height:20px; margin-top:8px; }
+  .credit { text-align:center; color:var(--sub); font-size:13px; margin-top:40px; letter-spacing:.2px; }
+  .credit b { color:inherit; font-weight:600; }
+  .credit .copy { font-size:11.5px; margin-top:2px; opacity:.8; }
+  .feedback { display:inline-block; color:var(--sub); font-size:13px; text-decoration:none;
+              border:1px solid var(--line); border-radius:20px; padding:6px 14px; margin-bottom:12px; }
+  .feedback:hover { border-color:var(--accent); color:var(--accent); }
+  .nav { display:grid; grid-template-columns:1fr 1.45fr 1fr 1fr; gap:4px; margin-top:16px;
+         background:var(--line); padding:4px; border-radius:12px; }
+  .nav button { border:none; background:none; color:var(--sub); font-family:inherit;
+                font-size:14px; font-weight:600; padding:9px 0; border-radius:9px; cursor:pointer; }
+  .nav button.on { background:var(--card); color:var(--text); box-shadow:0 1px 3px rgba(0,0,0,.1); }
+  .chips { display:flex; gap:6px; flex-wrap:wrap; margin-top:16px; }
+  .chips .tab { padding:8px 16px; }
+  .two { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:16px; }
+  .post { background:var(--card); border:1px solid var(--line); border-radius:14px;
+          padding:16px; margin-bottom:12px; cursor:pointer; }
+  .post.pin { border-color:var(--accent); }
+  .post .meta { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px; }
+  .post h3 { margin:0 0 6px; font-size:17px; line-height:1.35; }
+  .post .body { margin:0; white-space:pre-wrap; word-break:break-word; font-size:15px;
+                display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; }
+  .post.open .body { display:block; }
+  .post .more { color:var(--accent); font-size:13px; margin-top:6px; }
+  .post.open .more { display:none; }
+  .post a, .review a { color:var(--accent); word-break:break-all; }
+  .contact { margin-top:10px; font-size:14px; color:var(--sub); }
+  .diff { color:var(--accent); letter-spacing:2px; }
+  .list-top { margin-top:18px; }
+  .gate { background:var(--card); border:1px solid var(--line); border-radius:16px;
+          padding:28px 20px; text-align:center; margin-top:18px; }
+  .gate .emoji { font-size:34px; }
+  .gate h3 { margin:6px 0 4px; font-size:18px; }
+  .gate .row { display:flex; gap:8px; margin-top:16px; }
+  .gate .search { margin:0; flex:1; min-width:0; }
+  .gate button.btn { border:none; cursor:pointer; font-family:inherit; flex:none; }
+  .gate .write { display:inline-block; margin-top:14px; color:var(--accent); font-size:14px; font-weight:600; text-decoration:none; }
+  .photos { display:grid; gap:8px; margin-top:12px; }
+  .photos img { width:100%; border-radius:10px; display:block; background:var(--line); }
+  .links { display:grid; gap:8px; margin-top:18px; }
+  .drive { display:flex; align-items:center; gap:12px; background:var(--card); border:1px solid var(--line);
+           border-radius:14px; padding:14px 16px; text-decoration:none; color:var(--text); font-weight:600; }
+  .drive:hover { border-color:var(--accent); }
+  .drive .ico { width:36px; height:36px; border-radius:10px; background:var(--accent-soft); color:var(--accent);
+                display:grid; place-items:center; flex:none; }
+  .drive .arrow { margin-left:auto; color:var(--sub); }
+  .fab { position:fixed; right:16px; bottom:16px; box-shadow:0 6px 20px rgba(0,0,0,.18); }
+
+  /* ===== 슬림 레이아웃 ===== */
+  .nav { display:grid !important; grid-template-columns:repeat(3,1fr); }
+  .nav button { flex:1 1 auto; padding-left:6px !important; padding-right:6px !important; white-space:nowrap; }
+  .kinds { display:flex; gap:18px; margin-top:12px; padding:0 2px; border-bottom:1px solid var(--line); }
+  .kinds button { background:none; border:none; font-family:inherit; font-size:14px; font-weight:600;
+                  color:var(--sub); padding:6px 0 9px; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; }
+  .kinds button.on { color:var(--accent); border-bottom-color:var(--accent); }
+  .wrap { padding-top:20px; }
+  .topbar { align-items:center; }
+  .topbar h1 { font-size:20px; margin:0; white-space:nowrap; letter-spacing:-.2px; }
+  .topbar h1 .sub { font-size:13px; margin-top:1px; }
+  .guide-btn { margin-top:0; padding:5px 11px; font-size:12px; }
+  .nav { margin-top:14px; padding:3px; }
+  .nav button { padding:7px 0; font-size:12.5px; }
+  .links { margin-top:12px; gap:6px; }
+  .drive { padding:10px 12px; font-size:14px; border-radius:12px; gap:10px; }
+  .drive .ico { width:28px; height:28px; border-radius:8px; }
+  .scroll-tabs { display:grid; grid-template-columns:repeat(6,1fr) 1.6fr; gap:4px; margin-top:12px; }
+  .scroll-tabs .tab { padding:7px 0; font-size:12.5px; border-radius:20px; white-space:nowrap; }
+  .notice { margin-top:10px; padding:8px 12px; font-size:12px; }
+  .search { padding:10px 14px; margin:10px 0 12px; font-size:15px; border-radius:10px; }
+  .rows { background:var(--card); border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+  .row-item { display:flex; align-items:center; gap:10px; padding:12px 14px; cursor:pointer; }
+  .row-item + .row-item { border-top:1px solid var(--line); }
+  .row-item:hover { background:var(--accent-soft); }
+  .row-item .name { font-size:15px; font-weight:600; line-height:1.35; }
+  .row-item.elective .name { font-size:17px; font-weight:700; }
+  .row-item .meta2 { font-size:12px; color:var(--sub); margin-top:2px; }
+  .row-item .meta2 .s { color:var(--star); }
+  .row-item .chev { margin-left:auto; color:var(--sub); flex:none; }
+  .rows .empty { padding:28px 0; }
+  .two, .chips { margin-top:12px; }
+  .two .tab, .chips .tab { padding:7px 0; font-size:13px; }
+  .chips .tab { padding:7px 14px; border-radius:20px; }
+  .list-top { margin-top:12px; }
+  .credit { margin-top:32px; }
+
+  /* ===== 모바일 줄바꿈 · 정렬 정리 ===== */
+  :root { --gutter: clamp(14px, 4.2vw, 20px); }
+  html { -webkit-text-size-adjust:100%; }
+  body { word-break:keep-all; overflow-wrap:break-word; }
+  p, li, .body, .review p { text-wrap:pretty; }
+  h1, h2, h3, .empty, .notice, .lock .muted, .gate h3, .gate-desc { text-wrap:balance; }
+  .post a, .review a, .contact a { word-break:normal; overflow-wrap:anywhere; }
+  .wrap { padding:20px var(--gutter) calc(96px + env(safe-area-inset-bottom)); }
+  .fab { right:var(--gutter); bottom:calc(16px + env(safe-area-inset-bottom)); }
+
+  /* 상단 */
+  .topbar { gap:10px; }
+  .topbar h1 { font-size:clamp(17px, 5.2vw, 20px); min-width:0; }
+  .guide-btn { white-space:nowrap; }
+  .nav { gap:2px; }
+  .nav button { font-size:clamp(11px, 3.35vw, 13px); padding:7px 4px !important; letter-spacing:-.2px; }
+  .scroll-tabs .tab { font-size:clamp(11px, 3.2vw, 13px); letter-spacing:-.3px; }
+  .kinds { gap:clamp(12px, 4.5vw, 20px); }
+  .kinds button { font-size:clamp(13px, 3.7vw, 14px); white-space:nowrap; }
+
+  /* 안내 · 빈 화면 */
+  .notice { line-height:1.5; text-align:center; }
+  .empty { line-height:1.6; padding:36px 12px; }
+
+  /* 목록 */
+  .row-item { padding:12px 14px; }
+  .row-item > div:first-child { min-width:0; }
+  .row-item .name { text-wrap:balance; }
+
+  /* 상세 */
+  .head { align-items:stretch; flex-direction:column; gap:12px; }
+  .head h1 { font-size:clamp(22px, 6.6vw, 26px); line-height:1.25; margin:6px 0 2px; }
+  .head h1.elective { font-size:clamp(25px, 7.6vw, 30px); }
+  .head .btn { text-align:center; }
+  .review { padding:14px 16px; }
+  .review .top { align-items:center; }
+  .tag { margin:10px 0 3px; }
+
+  /* 게시글 */
+  .post { padding:14px 16px; }
+  .post .meta { flex-wrap:wrap; row-gap:4px; }
+  .post .meta > span:first-child { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+  .post h3 { text-wrap:balance; }
+  .contact { overflow-wrap:anywhere; }
+
+  /* 열람코드 · 잠금 화면 */
+  .gate { padding:26px clamp(16px, 5vw, 24px); }
+  .gate-desc { line-height:1.6; margin:6px 0 0; }
+  .gate .row { margin-top:18px; }
+  .gate button.btn { padding:11px 20px; }
+  .lock { width:100%; max-width:360px; margin-top:clamp(56px, 16vh, 140px); }
+  .lock h1 { font-size:clamp(19px, 5.8vw, 22px); white-space:nowrap; }
+  .lock .search { margin:16px 0 10px; }
+
+  /* 하단 */
+  .credit { margin-top:36px; }
+  .pills { gap:6px; }
+
+  /* white-space:pre-wrap 이 줄바꿈 설정을 덮어쓰지 않도록 다시 지정 */
+  .post .body, .review p, .modal li, .modal p { white-space-collapse:preserve-breaks; text-wrap:pretty;
+    word-break:keep-all; overflow-wrap:break-word; }
+
+  .nb { display:inline-block; }
+  .gate .err { margin-top:6px; min-height:18px; }
+  .gate .write { margin-top:2px; }
+
+  /* 과목 상세: 후기 유형 필터 */
+  .filters { display:flex; gap:2px; margin-top:4px;
+             background:var(--line); padding:3px; border-radius:12px; }
+  .filters button { border:none; background:none; color:var(--sub); font-family:inherit; cursor:pointer;
+                    flex:1 1 auto; font-size:clamp(11.5px, 3.4vw, 13px); font-weight:600; padding:8px 6px; border-radius:9px;
+                    white-space:nowrap; letter-spacing:-.2px; display:flex; align-items:center; justify-content:center; gap:4px; }
+  .filters button.on { background:var(--card); color:var(--text); box-shadow:0 1px 3px rgba(0,0,0,.1); }
+  .filters .cnt { font-size:11px; font-weight:600; color:var(--sub); }
+  .filters button.on .cnt { color:var(--accent); }
+  .filter-bar { display:flex; justify-content:space-between; align-items:center; gap:10px;
+                margin:10px 2px 12px; font-size:13px; }
+  .filter-bar .muted { font-size:12.5px; min-width:0; }
+  .write-link { flex:none; color:var(--accent); font-weight:600; text-decoration:none; font-size:13px; white-space:nowrap; }
+  .head { margin-bottom:14px; }
+  .review > p { margin-top:2px; }
+  .empty-btn { margin-top:14px; font-size:14px; padding:10px 18px; }
+  .fab { font-size:15px; padding:13px 20px; border-radius:999px;
+         box-shadow:0 8px 24px rgba(79,107,237,.38), 0 2px 6px rgba(0,0,0,.12); }
+  @media (max-width:380px) { .filters .cnt { display:none; } .filters button { padding:8px 4px; } }
+  .filter-bar .muted { text-wrap:balance; }
+
+  /* 예시 글 표시 */
+  .sample-badge { display:inline-block; font-size:11.5px; font-weight:700; color:var(--sub);
+                  border:1px dashed var(--sub); border-radius:6px; padding:1px 7px; line-height:1.6; }
+  .post:has(.sample-badge) { border-style:dashed; }
+
+  /* 단과대 선택 */
+  .colleges { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-top:12px; }
+  .colleges button { border:1px solid var(--line); background:var(--card); color:var(--text);
+                     font-family:inherit; font-size:14px; font-weight:700; padding:9px 0; border-radius:10px; cursor:pointer; }
+  .colleges button.on { background:var(--text); border-color:var(--text); color:var(--bg); }
+  .scroll-tabs.g5 { grid-template-columns:repeat(5,1fr) 1.6fr; }
+  .scroll-tabs { margin-top:8px; }
+
+  /* 내용이 짧아도 하단 문구가 떠 있는 쓰기 버튼에 가려지지 않게 */
+  .wrap { min-height:100vh; min-height:100dvh; display:flex; flex-direction:column; }
+  .wrap > .credit { margin-top:auto; padding-top:36px; }
+  .wrap > .back { align-self:flex-start; }
+  .common-note { margin-top:10px; font-size:12.5px; color:var(--sub); text-align:center; }
+  .colleges.dim button.on { background:var(--card); border-color:var(--line); color:var(--text); }
+
+  .notice.honey { padding:10px 12px; }
+  .list-top > .gate:first-child { margin-top:0; }
+  .notice.honey b { display:block; font-size:13.5px; font-weight:700; }
+  .notice.honey .honey-sub { display:block; font-size:11.5px; margin-top:2px; opacity:.8; }
+
+  .nick { font-weight:600; color:var(--text); opacity:.75; }
+  .review .top > .muted { text-align:right; }
+
+  .row-item .yr { font-size:12px; font-weight:700; color:var(--accent); margin-left:2px; white-space:nowrap; }
+  .row-item .desc { font-size:12.5px; color:var(--sub); margin-top:1px; }
+  .head-desc { margin:2px 0 6px; font-size:13.5px; }
+  .chips-mini { display:flex; flex-wrap:wrap; gap:6px; margin:2px 0 8px; }
+
+
+  .grad-row { margin-top:10px; border-color:var(--accent); }
+  .row-item.gx { gap:12px; }
+  .gx-ico { font-size:22px; flex:none; }
+
+  /* 아주 좁은 화면 (320px 대): 학년 탭을 두 줄로 */
+  @media (max-width:350px) {
+    .scroll-tabs, .scroll-tabs.g5 { grid-template-columns:repeat(4,1fr); gap:5px; }
+    .scroll-tabs .tab { font-size:13px; letter-spacing:0; }
+    .scroll-tabs .tab[data-g="E"] { grid-column:span 2; }
+    .topbar h1 .sub { font-size:12px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"><p class="muted">불러오는 중…</p></div>
+
+<script>
+// 예시 1~3학년 — 타임스탬프, 단과대·학년, 후기 종류, 과목명, 별점, 후기 내용, 꿀팁
+const SAMPLE_LOWER = [
+  ["2026. 9. 18","치대 1학년","수강후기","General Dental Materials","4","실습 위주라 출석 필수, 재료 이름 외울 게 많아요.","실습 노트 꼼꼼히 정리하기","치과의꿈"],
+  ["2026. 9. 21","약대 1학년","수강후기","General Chemistry","3","렉처 속도 빠르고 매주 퀴즈가 있어요.","연습문제 미리 풀어가기",""],
+  ["2026. 9. 15","의대 1학년","수강후기","Macroscopic Anatomy and Embryology I","4","렉처 양이 많고 교수님 설명이 빨라요. 프렉 해부실습은 출석 필수, 과제는 거의 없어요.","아틀라스 끼고 살기","해부왕"],
+  ["2026. 10. 1","의대 1학년","Midterm","Macroscopic Anatomy and Embryology I","3","뼈 파트 땡시 형식이라 시간이 빠듯했어요.","라틴어 철자 틀리면 감점",""],
+  ["2026. 12. 20","의대 1학년","Exam","Macroscopic Anatomy and Embryology I","4","Final은 구술 + 필기. 구술은 표본 들고 설명하는 방식이에요.","Semi-final 점수가 반영되니 꼭 챙기기","생리학러버"],
+  ["2026. 10. 5","의대 2학년","Competition","Medical Physiology I","5","서술형 위주, 상위권은 가산점이 있어요.","미리 신청해야 해요",""],
+];
+// 예시 4학년 이상 — 타임스탬프, 단과대·학년, 후기 종류, 과목명, 별점, 후기 내용, 꿀팁
+const SAMPLE_UPPER = [
+  ["2026. 6. 2","의대 6학년 졸업시험","","","4","구술 위주, 케이스 하나 받아서 감별진단까지 말해야 해요.","교수님별 기출 질문 정리본 필수","내과가즈아"],
+  ["2026. 9. 20","의대 4학년","수강후기","Surgery","5","렉처는 출첵 없고 프렉은 출석 필수. 병동마다 분위기가 달라요.","프렉 때 적극적으로 질문하면 좋아요","외과지망생"],
+  ["2026. 9. 22","의대 4학년","Exam","Surgery","4","구술시험, 케이스 위주로 물어봐요.","족보 꼭 챙기기",""],
+  ["2026. 9. 25","의대 4학년","수강후기","Dermatology","5","프렉 짧고 편해요. 공부량도 적당해요.","아틀라스 사진 많이 보기","피부과최고"],
+];
+// 예시 졸업생 글 — 타임스탬프, 졸업 연도, 분류, 제목, 내용, 연락처
+// 예시 실습후기 — 질문 제목 순서와 같아요
+const PRACTICE_HEADER = ["타임스탬프", "단과대", "실습 종류", "실습 장소", "실습 시기", "별점", "후기 내용", "꿀팁", "닉네임"];
+const SAMPLE_PRACTICE = [
+  ["2026. 8. 20","의대","Nursing","Budapest · Semmelweis 병원","2026 여름","4","첫 주는 활력징후 측정, 둘째 주부터 병동 업무 보조했어요.","헝가리어 기본 표현 외워가기","병동요정"],
+  ["2026. 8. 28","의대","기타 실습","서울 · 대학병원 (서브인턴)","2026 여름","5","외래 참관과 회진 위주. 교수님들이 친절하게 설명해주셨어요.","지원 서류는 3개월 전에 준비","서브인턴러"],
+];
+const SAMPLE_GRAD = [
+  ["2026. 7. 3","약대","2024","취업·병원","한국 약국 근무 후기","면허 전환 후 첫 직장 구한 과정을 정리했어요.",""],
+  ["2026. 8. 1","의대","2024","진로","한국 인턴 지원 후기","국시 합격 후 인턴 지원까지 준비했던 순서를 정리했어요.\n서류는 미리미리 번역 공증 받아두세요.","궁금한 거 있으면 오픈채팅 https://open.kakao.com/o/example"],
+  ["2026. 9. 12","의대","2023","취업·병원","독일 병원 취업 준비","독일어 B2부터 시작해서 Approbation까지 걸린 기간과 비용 공유합니다.",""],
+];
+// 예시 Elective 후기 (의치약 공통) — 타임스탬프, 후기 종류, 과목명, 별점, 후기 내용, 꿀팁
+const SAMPLE_ELECTIVE = [
+  ["2026. 9. 28","수강후기","Library Informatics","5","출첵 없음, 렉처 몇 번만 있어요. 과제 하나로 끝나요.","부담 없이 듣기 좋아요","도서관지박령"],
+  ["2026. 10. 2","수강후기","Chinese Medicine","4","매주 출석, 침술 · 한방 이론을 기초부터 설명해줘요.","렉처 노트만 잘 정리하면 충분해요",""],
+];
+
+// 예시 시험후기 — 타임스탬프, 시험 종류, 응시 시기, 난이도, 공부 방법, 시험 후기, 꿀팁
+const SAMPLE_EXAM = [
+  ["2026. 6. 15","치대","국시","2026 여름","4","실기 영상 반복해서 보기","임상 사진 문제가 많았어요","손 감각 유지하게 실습실 자주 가기",""],
+  ["2026. 6. 10","의대","예비시험","2026 여름","4","기출 3회독 + 요약본","임상 케이스 문제가 많았어요","시간 배분 연습 꼭 하기","합격기원"],
+  ["2026. 6. 12","의대","국시","2026 여름","3","문제집 1권 + 스터디","생각보다 기출이 그대로 나옴","마지막 2주는 오답 위주로",""],
+];
+// 예시 홍보글 — 타임스탬프, 분류, 제목, 내용, 연락처
+const SAMPLE_PROMO = [
+  ["2026. 9. 25","과외","아나토미 과외해요","Macroscopic Anatomy 구술 대비 위주로 알려드려요. 1학년 환영!","DM 주세요"],
+  ["2026. 9. 30","동아리","의료봉사 동아리 신입 모집","한 학기에 두 번 봉사활동을 가요. 학년 상관없이 환영!","인스타 @example_club"],
+  ["2026. 10. 3","스터디","국가고시 대비 아침 스터디 모집","매주 월/수/금 오전 8시, 도서관 스터디룸에서 기출 같이 풀어요.\n현재 3명, 2명 더 모집합니다!","카톡 오픈채팅 https://open.kakao.com/o/example"],
+];
+// 예시 정보글 — 타임스탬프, 제목, 내용, 링크, 사진, 고정
+const SAMPLE_INFO = [
+  ["2026. 9. 15","학생증 만드는 방법","신청부터 수령까지 순서와 준비물을 정리했어요.","","",""],
+  ["2026. 9. 20","거주증 만드는 방법","예약 방법, 필요한 서류, 주의할 점을 정리했어요. 기한 놓치지 않게 미리 준비하세요!","","",""],
+  ["2026. 10. 1","📌 학사일정 정리","가을학기 시험 기간과 등록 마감일을 정리했어요.","https://semmelweis.hu","","고정"],
+];
+
+const $app = document.getElementById("app");
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const credit = (extra = "") => `<div class="credit">
+  <div class="pills">${extra}<a class="feedback" href="${esc(FEEDBACK_FORM_URL || "#")}" target="_blank">건의사항 & 오류 신고</a></div>
+  <div>Made by <b>꿀다람쥐</b></div>
+  <div class="copy">© 2026 All rights reserved.</div>
+</div>`;
+const starStr = n => "★".repeat(Math.round(n)) + "☆".repeat(5 - Math.round(n));
+const titleHTML = () => `<h1>${esc(SITE_TITLE)}<span class="sub">${esc(SITE_SUBTITLE)}</span></h1>`;
+const gradeLabel = g => g === "E" ? "Elective" : g + "학년";
+
+// ===== 이용안내 =====
+function guideHTML() {
+  let html = "", inList = false;
+  GUIDE.trim().split("\n").forEach(raw => {
+    const line = raw.trim();
+    if (line.startsWith("- ")) {
+      if (!inList) { html += "<ul>"; inList = true; }
+      html += `<li>${esc(line.slice(2))}</li>`; return;
+    }
+    if (inList) { html += "</ul>"; inList = false; }
+    if (line.startsWith("# ")) html += `<h3>${esc(line.slice(2))}</h3>`;
+    else if (line) html += `<p>${esc(line)}</p>`;
+  });
+  return html + (inList ? "</ul>" : "");
+}
+function openGuide() {
+  const bg = document.createElement("div");
+  bg.className = "modal-bg";
+  bg.innerHTML = `<div class="modal" role="dialog" aria-label="이용안내">
+    <div class="modal-head"><h2>이용안내</h2><button class="x" aria-label="닫기">×</button></div>
+    ${guideHTML()}</div>`;
+  const close = () => bg.remove();
+  bg.onclick = e => { if (e.target === bg) close(); };
+  bg.querySelector(".x").onclick = close;
+  document.addEventListener("keydown", function k(e) { if (e.key === "Escape") { close(); document.removeEventListener("keydown", k); } });
+  document.body.appendChild(bg);
+}
+const guideBtn = () => `<button class="guide-btn" onclick="openGuide()">이용안내</button>`;
+// 대소문자·띄어쓰기·기호 차이는 무시하고 같은 과목으로 보기
+const norm = s => s.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
+const avgOf = list => list.length ? list.reduce((a, r) => a + r.rating, 0) / list.length : 0;
+
+function parseCSV(text) {
+  const rows = []; let row = [], cur = "", q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) {
+      if (c === '"' && text[i+1] === '"') { cur += '"'; i++; }
+      else if (c === '"') q = false;
+      else cur += c;
+    } else if (c === '"') q = true;
+    else if (c === ",") { row.push(cur); cur = ""; }
+    else if (c === "\n") { row.push(cur); rows.push(row); row = []; cur = ""; }
+    else if (c !== "\r") cur += c;
+  }
+  if (cur || row.length) { row.push(cur); rows.push(row); }
+  return rows;
+}
+
+let practices = [];
+const OTHER_PRACTICE = "기타 실습";
+// 폼에 적힌 실습 종류를 PRACTICES 이름에 맞추고, 없으면 '기타 실습'
+const practiceOf = (c, t) => ((PRACTICES[c] || []).find(([n]) => norm(t).includes(norm(n))) || [OTHER_PRACTICE])[0];
+let reviews = [], exams = [], promos = [], infos = [], grads = [], usingSample = false, loaded = false;
+let detailKind = "R";  // 과목 상세 필터: R=수강후기, E=Exam, M=Midterm, C=Competition
+const kindOf = s => /mid/i.test(s || "") ? "M" : /comp/i.test(s || "") ? "C"
+  : /졸업|state/i.test(s || "") ? "F" : /exam|final|시험/i.test(s || "") ? "E" : "R";
+const COLLEGES = ["의대", "치대", "약대"];
+const collegeOf = s => /치|dent/i.test(s || "") ? "치대" : /약|pharm/i.test(s || "") ? "약대" : "의대";
+const maxGrade = c => Object.keys(SUBJECTS[c] || {}).length || (c === "의대" ? 6 : 5);
+let college = "의대";
+try { const c = localStorage.getItem("college"); if (COLLEGES.includes(c)) college = c; } catch (e) {}
+let grade = 4, view = "subject", examType = "예비시험", promoCat = "전체";
+try { const s = localStorage.getItem("grade"); grade = s === "E" ? "E" : (Number(s) || 4); } catch (e) {}
+if (grade !== "E" && grade > maxGrade(college)) grade = maxGrade(college);
+
+async function fetchRows(url, keepHeader = false) {
+  const res = await fetch(url + (url.includes("?") ? "&" : "?") + "t=" + Date.now());
+  const rows = parseCSV(await res.text());
+  return keepHeader ? rows : rows.slice(1);  // 첫 줄 = 질문 제목
+}
+// 질문 제목으로 칸을 찾아 읽기 (섹션이 여러 개여도, 순서가 바뀌어도 괜찮아요)
+function byHeader(rows) {
+  const [head = [], ...data] = rows;
+  const H = head.map(x => (x || "").replace(/\s+/g, "").toLowerCase());
+  const cols = {};
+  const colsOf = kw => cols[kw] ||= H.map((x, i) => x.includes(kw) ? i : -1).filter(i => i >= 0);
+  const pick = (r, ...kws) => { for (const kw of kws) for (const i of colsOf(kw)) if (has(r[i])) return r[i].trim(); return ""; };
+  return { data, pick };
+}
+// 링크가 있으면 시트에서, 없으면 예시 데이터 (아무 시트도 연결 안 했을 때만)
+const ANY_SHEET = LOWER_CSV_URL || UPPER_CSV_URL;
+const source = (url, sample) => url ? fetchRows(url).catch(() => []) : Promise.resolve(ANY_SHEET ? [] : sample);
+const REVIEW_HEADER = ["타임스탬프", "단과대·학년", "후기 종류", "과목명", "별점", "후기 내용", "꿀팁", "닉네임"];
+const sourceH = (url, sample) => url ? fetchRows(url, true).catch(() => []) : Promise.resolve(ANY_SHEET ? [] : [REVIEW_HEADER, ...sample]);
+const cleanDate = s => (s || "").split(/\s+(오전|오후|\d+:)/)[0].trim();
+const toRating = s => Math.min(5, Math.max(0, parseFloat((s || "").replace(/[^\d.]/g, "")) || 0));
+const linkify = s => esc(s).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+const has = s => s && s.trim();
+// 구글 드라이브 공유 링크 → 이미지 주소로 바꾸기 (깃허브 파일 이름은 그대로)
+function photoURL(s) {
+  const m = s.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?.*id=)([\w-]+)/);
+  return m ? "https://drive.google.com/thumbnail?id=" + m[1] + "&sz=w1200" : s;
+}
+
+async function load() {
+  const [lRows, uRows, eRows, xRows, pRows, iRows, gRows, prRows] = await Promise.all([
+    sourceH(LOWER_CSV_URL, SAMPLE_LOWER), sourceH(UPPER_CSV_URL, SAMPLE_UPPER),
+    source(ELECTIVE_CSV_URL, SAMPLE_ELECTIVE), source(EXAM_CSV_URL, SAMPLE_EXAM),
+    source(PROMO_CSV_URL, SAMPLE_PROMO), source(INFO_CSV_URL, SAMPLE_INFO), source(GRAD_CSV_URL, SAMPLE_GRAD),
+    PRACTICE_CSV_URL ? fetchRows(PRACTICE_CSV_URL, true).catch(() => []) : Promise.resolve(ANY_SHEET ? [] : [PRACTICE_HEADER, ...SAMPLE_PRACTICE]),
+  ]);
+  usingSample = !ANY_SHEET;
+  const gradeNum = s => parseInt((s || "").replace(/\D/g, "")) || 0;
+
+  // 학년 폼(1~3, 4학년 이상): 질문 제목으로 읽어요 — 단과대·학년, 후기 종류, 과목명(섹션마다), 별점, 후기 내용, 꿀팁, 닉네임
+  const gradeRows = rows => {
+    const { data, pick } = byHeader(rows);
+    return data.map(r => {
+      const cg = pick(r, "단과대"), gradExam = /졸업/.test(cg);   // "의대 6학년 졸업시험" = 과목과 별개
+      return {
+        date: cleanDate(r[0]), college: collegeOf(cg), grade: gradeNum(pick(r, "학년")),
+        kind: gradExam ? "F" : kindOf(pick(r, "종류")), subject: gradExam ? "" : pick(r, "과목명"),
+        rating: toRating(pick(r, "별점")), body: pick(r, "후기내용", "내용"), tip: pick(r, "꿀팁"), nick: pick(r, "닉네임"),
+      };
+    }).filter(x => x.grade && (x.subject || x.kind === "F"));
+  };
+  const lower = gradeRows(lRows);
+  const upper = gradeRows(uRows);
+  const main = [...lower, ...upper];
+  // Elective 폼 (의치약 공통): 타임스탬프, 후기 종류, 과목명, 별점, 후기 내용, 꿀팁
+  // 실습후기: 질문 제목으로 읽기
+  {
+    const { data, pick } = byHeader(prRows);
+    practices = data.map(r => {
+      const c = collegeOf(pick(r, "단과대")), t = pick(r, "종류");
+      return {
+        date: cleanDate(r[0]), college: c, type: practiceOf(c, t), place: pick(r, "장소"), when: pick(r, "시기"),
+        rating: toRating(pick(r, "별점")), body: pick(r, "후기내용", "내용"), tip: pick(r, "꿀팁"), nick: pick(r, "닉네임"),
+      };
+    }).filter(x => x.type && (has(x.body) || x.rating)).reverse();
+  }
+  const elec = eRows.filter(r => has(r[2])).map(r => ({
+    date: cleanDate(r[0]), college: "공통", grade: "E", kind: kindOf(r[1]),
+    subject: r[2].trim().replace(/\s+/g, " "), rating: toRating(r[3]), body: r[4], tip: r[5], nick: r[6],
+  }));
+  reviews = [...main, ...elec].reverse();
+  // 시험후기: 타임스탬프, 단과대, 종류, 시기, 난이도, 공부법, 후기, 꿀팁
+  exams = xRows.filter(r => has(r[2])).map(r => ({
+    date: cleanDate(r[0]), college: collegeOf(r[1]), type: /국/.test(r[2]) ? "국시" : "예비시험",
+    when: r[3], diff: toRating(r[4]), study: r[5], review: r[6], tip: r[7], nick: r[8],
+  })).reverse();
+  // 홍보: 타임스탬프, 분류, 제목, 내용, 연락처
+  const isSample = url => !url && !ANY_SHEET;
+  promos = pRows.filter(r => has(r[2]) || has(r[3])).map(r => ({
+    date: cleanDate(r[0]), cat: (r[1] || "기타").trim(), title: r[2], body: r[3], contact: r[4], sample: isSample(PROMO_CSV_URL),
+  })).reverse();
+  // 정보: 타임스탬프, 제목, 내용, 링크, 사진, (고정) — 고정글 먼저, 나머지는 최신순
+  const info = iRows.filter(r => has(r[1])).map(r => ({
+    date: cleanDate(r[0]), title: r[1], body: r[2], link: r[3], pin: has(r[5]), sample: isSample(INFO_CSV_URL),
+    photos: (r[4] || "").split(/[\s,]+/).filter(Boolean).map(photoURL),
+  })).reverse();
+  infos = [...info.filter(x => x.pin), ...info.filter(x => !x.pin)];
+  // 졸업생: 타임스탬프, 단과대, 졸업 연도, 분류, 제목, 내용, 연락처
+  grads = gRows.filter(r => has(r[4]) || has(r[5])).map(r => ({
+    date: cleanDate(r[0]), college: collegeOf(r[1]), year: (r[2] || "").trim(), cat: (r[3] || "기타").trim(), title: r[4], body: r[5], contact: r[6], sample: isSample(GRAD_CSV_URL),
+  })).reverse();
+  loaded = true;
+  route();
+}
+
+function withParams(base, params) {
+  if (!base) return "#";
+  if (!params.length) return base;
+  return base + (base.includes("?") ? "&" : "?") + "usp=pp_url&" + params.join("&");
+}
+const KIND_LABEL = { R: "수강후기", E: "Exam", M: "Midterm", C: "Competition", F: "졸업시험" };
+const isLower = g => typeof g === "number" && g <= 3;
+const kindsFor = g => isLower(g) ? ["R", "E", "M", "C"] : ["R", "E"];
+function formLink(g, subject, k = "R") {
+  const enc = encodeURIComponent, params = [];
+  const add = (entry, val) => { if (entry && val) params.push(entry + "=" + enc(val)); };
+  if (g === "E") {
+    add(ELECTIVE_KIND_ENTRY, KIND_LABEL[k]); add(ELECTIVE_SUBJECT_ENTRY, subject);
+    return withParams(ELECTIVE_FORM_URL, params);
+  }
+  if (isLower(g)) {
+    add(LOWER_COLLEGE_GRADE_ENTRY, college + " " + g + "학년"); add(LOWER_KIND_ENTRY, KIND_LABEL[k]);
+    return withParams(LOWER_FORM_URL, params);
+  }
+  add(UPPER_COLLEGE_GRADE_ENTRY, college + " " + g + "학년"); add(UPPER_KIND_ENTRY, KIND_LABEL[k]);
+  return withParams(UPPER_FORM_URL, params);
+}
+
+// ===== 상단 공통: 제목 + 메뉴 =====
+const VIEWS = [["subject","과목후기"],["practice","실습후기"],["exam","국시·예비시험"],["grad","졸업생"],["promo","홍보"],["info","정보"]];
+function header() {
+  return `<div class="topbar">${titleHTML()}${guideBtn()}</div>
+    <nav class="nav">${VIEWS.map(([k, label]) =>
+      `<button class="${k === view ? "on" : ""}" data-v="${k}">${label}</button>`).join("")}</nav>`;
+}
+function bindHeader() {
+  document.querySelectorAll(".nav button").forEach(el => el.onclick = () => {
+    location.hash = el.dataset.v === "subject" ? "" : "v=" + el.dataset.v;
+    if (el.dataset.v === "subject" && !location.hash) { view = "subject"; route(); }
+  });
+}
+// 닉네임(선택): 있으면 날짜 앞에 작게
+const nickDate = x => `<span class="muted">${has(x.nick) ? `<span class="nick">${esc(x.nick.trim().slice(0, 20))}</span> · ` : ""}${esc(x.date)}</span>`;
+const sampleBadge = x => x.sample ? '<span class="sample-badge">예시</span>' : "";
+// 후기 화면 공통 배너 — 항상 보이고, 시트 연결 전에는 예시 안내가 작게 붙어요
+const honeyBanner = () => `<div class="notice honey"><b>🍯 꿀팁은 나눌수록 커져요</b>${usingSample
+  ? '<span class="honey-sub">지금은 예시 내용이에요 · 시트를 연결하면 실제 글이 보여요</span>' : ""}</div>`;
+const sampleNotice = () => usingSample ? '<div class="notice"><span class="nb">지금은 예시 내용이에요 ·</span> <span class="nb">시트를 연결하면 실제 글이 보여요</span></div>' : "";
+function bindPosts() {
+  // 내용이 짧으면 '더보기' 숨기기
+  document.querySelectorAll(".post").forEach(el => {
+    const body = el.querySelector(".body");
+    if (body.scrollHeight <= body.clientHeight + 2) { el.querySelector(".more").remove(); el.classList.add("open"); el.style.cursor = "default"; }
+  });
+  document.querySelectorAll(".post").forEach(el => el.onclick = e => {
+    if (e.target.closest("a")) return;
+    el.classList.toggle("open");
+  });
+}
+
+// ===== 단과대 선택 (과목후기 · 국시·예비시험 · 졸업생 공통) =====
+const collegeTabs = () => `<div class="colleges">${COLLEGES.map(c =>
+  `<button class="${c === college ? "on" : ""}" data-c="${c}">${c}</button>`).join("")}</div>`;
+function bindColleges(rerender) {
+  document.querySelectorAll(".colleges button").forEach(el => el.onclick = () => {
+    college = el.dataset.c;
+    if (grade !== "E" && grade > maxGrade(college)) grade = maxGrade(college);
+    try { localStorage.setItem("college", college); localStorage.setItem("grade", grade); } catch (e) {}
+    rerender();
+  });
+}
+
+// ===== 과목후기 =====
+function renderHome(query = "") {
+  view = "subject";
+  const isE = grade === "E";
+  const map = {};
+  reviews.filter(r => r.grade === grade && r.kind !== "F" && (grade === "E" || r.college === college)).forEach(r => {
+    // 대소문자·띄어쓰기·기호가 달라도 같은 과목으로 묶고, 과목 목록에 있으면 그 이름으로 표시
+    const key = (isE ? [] : ((SUBJECTS[college] || {})[grade] || [])).find(s => norm(s) === norm(r.subject))
+      || Object.keys(map).find(k => norm(k) === norm(r.subject)) || r.subject;
+    (map[key] ||= []).push(r);
+  });
+  const list = isE ? [] : ((SUBJECTS[college] || {})[grade] || []);
+  let all = [...list, ...Object.keys(map).filter(s => !list.includes(s))];
+  if (isE) all.sort((a, b) => map[b].length - map[a].length || a.localeCompare(b));
+  const subjects = all.filter(s => s.toLowerCase().includes(query.toLowerCase()));
+
+  const emptyMsg = all.length ? "검색 결과가 없어요"
+    : isE ? "아직 Elective 후기가 없어요<br>첫 후기를 남겨주세요!" : "아직 등록된 과목이 없어요";
+
+  $app.innerHTML = `
+    ${header()}
+    ${driveLinks()}
+    ${collegeTabs().replace('class="colleges"', grade === "E" ? 'class="colleges dim"' : 'class="colleges"')}
+    <div class="scroll-tabs g${maxGrade(college)}">${[...Array(maxGrade(college)).keys()].map(i => i + 1).concat("E").map(g =>
+      `<button class="tab ${g === grade ? "on" : ""}" data-g="${g}">${gradeLabel(g)}</button>`).join("")}</div>
+    ${grade === "E" ? '<div class="common-note">Elective는 의대 · 치대 · 약대 공통이에요</div>' : ""}
+    ${honeyBanner()}
+    ${grade === 6 ? (() => {
+      const gx = gradExams(), avg = avgOf(gx);
+      return `<div class="rows grad-row"><div class="row-item gx" data-gx="1">
+        <span class="gx-ico">🎓</span>
+        <div>
+          <div class="name">졸업시험 후기</div>
+          <div class="desc">6학년 졸업시험 (State exam) · 과목과 별개</div>
+          <div class="meta2">${gx.length ? `<span class="s">★</span> ${avg.toFixed(1)} · 후기 ${gx.length}` : "아직 후기 없음"}</div>
+        </div>
+        <span class="chev">›</span>
+      </div></div>`;
+    })() : ""}
+    <input class="search" id="q" placeholder="🔍 ${grade === "E" ? "Elective" : college + " " + gradeLabel(grade)} 과목 검색" value="${esc(query)}">
+    <div class="rows">${subjects.map(s => {
+      const rs = map[s] || [], avg = avgOf(rs);
+      return `<div class="row-item ${isE ? "elective" : ""}" data-s="${esc(s)}">
+        <div>
+          <div class="name">${esc(s)}</div>
+          <div class="meta2">${rs.length ? `<span class="s">★</span> ${avg.toFixed(1)} · 후기 ${rs.length}` : "아직 후기 없음"}</div>
+        </div>
+        <span class="chev">›</span>
+      </div>`;
+    }).join("") || `<p class="empty">${emptyMsg}</p>`}</div>
+    ${credit()}
+    <a class="btn fab" href="${esc(formLink(grade, ""))}" target="_blank">✏️ 후기 쓰기</a>`;
+
+  bindHeader();
+  bindColleges(() => renderHome());
+  document.querySelectorAll(".scroll-tabs .tab").forEach(el => el.onclick = () => {
+    grade = el.dataset.g === "E" ? "E" : Number(el.dataset.g);
+    try { localStorage.setItem("grade", grade); } catch (e) {}
+    renderHome();
+  });
+  const q = document.getElementById("q");
+  q.oninput = () => { renderHome(q.value); const n = document.getElementById("q"); n.focus(); n.setSelectionRange(n.value.length, n.value.length); };
+  document.querySelectorAll(".row-item").forEach(el => el.onclick = () => {
+    if (el.dataset.gx) { location.hash = "c=" + encodeURIComponent(college) + "&gradexam"; return; }
+    detailKind = "R";  // 새 과목을 열면 항상 '수강후기'부터
+    location.hash = "c=" + encodeURIComponent(college) + "&g=" + grade + "&s=" + encodeURIComponent(el.dataset.s);
+  });
+}
+
+// ===== 6학년 졸업시험 후기 (과목과 별개) =====
+const gradExams = () => reviews.filter(r => r.kind === "F" && r.college === college && r.grade === 6);
+const gradExamLink = () => {
+  const entry = UPPER_COLLEGE_GRADE_ENTRY;
+  return withParams(UPPER_FORM_URL, entry ? [entry + "=" + encodeURIComponent(college + " 6학년 졸업시험")] : []);
+};
+function renderGradExam() {
+  grade = 6;
+  const list = gradExams(), avg = avgOf(list), link = gradExamLink();
+  $app.innerHTML = `
+    <button class="back" onclick="location.hash=''">← ${college} 6학년</button>
+    <div class="head">
+      <div>
+        <span class="pill">${college} · 6학년</span>
+        <h1>🎓 졸업시험 후기</h1>
+        <div class="muted head-desc">6학년 졸업시험 (State exam) 준비 · 형식 · 분위기</div>
+        <span class="big">${avg.toFixed(1)}</span> <span class="stars">${starStr(avg)}</span>
+        <span class="muted"> · 후기 ${list.length}개</span>
+      </div>
+    </div>
+    ${!list.length ? `<div class="empty">아직 졸업시험 후기가 없어요<br>첫 후기를 남겨주세요!
+        <div><a class="btn empty-btn" href="${esc(link)}" target="_blank">✏️ 첫 졸업시험 후기 쓰기</a></div></div>`
+      : !viewUnlocked() ? gateHTML(link)
+      : list.map(r => `
+      <div class="review">
+        <div class="top"><span class="stars">${starStr(r.rating)}</span>${nickDate(r)}</div>
+        ${has(r.body) ? `<p>${linkify(r.body)}</p>` : ""}
+        ${has(r.tip) ? `<span class="tag">꿀팁</span><p>${linkify(r.tip)}</p>` : ""}
+      </div>`).join("")}
+    ${list.length && viewUnlocked() ? `<a class="btn fab" href="${esc(link)}" target="_blank">✏️ 졸업시험 후기 쓰기</a>` : ""}`;
+  bindGate();
+  window.scrollTo(0, 0);
+}
+
+function renderSubject(g, name) {
+  const isE = g === "E";
+  const all = reviews.filter(r => r.grade === g && (isE || r.college === college) && norm(r.subject) === norm(name));
+  const kinds = kindsFor(g);
+  if (!kinds.includes(detailKind)) detailKind = "R";
+  const k = detailKind;
+  const list = all.filter(r => r.kind === k);
+  const avg = avgOf(all);
+  const count = x => all.filter(r => r.kind === x).length;
+  const block = (label, text) => has(text) ? `<span class="tag">${label}</span><p>${linkify(text)}</p>` : "";
+  const DESC = {
+    R: "수업 · 교수님 · 출석 · 과제 · 공부량",
+    E: "Final · Semi-final",
+    M: "중간시험 후기",
+    C: "Competition 시험 후기",
+    F: "6학년 졸업시험 (State exam) 후기",
+  };
+
+  $app.innerHTML = `
+    <button class="back" onclick="location.hash=''">← ${isE ? "Elective" : college + " " + gradeLabel(g)}</button>
+    <div class="head">
+      <div>
+        <span class="pill">${isE ? "Elective · 의치약 공통" : college + " · " + gradeLabel(g)}</span>
+        <h1 class="${isE ? "elective" : ""}">${esc(name)}</h1>
+        <span class="big">${avg.toFixed(1)}</span> <span class="stars">${starStr(avg)}</span>
+        <span class="muted"> · 후기 ${all.length}개</span>
+      </div>
+    </div>
+    <div class="filters" role="tablist">${kinds.map(x =>
+      `<button role="tab" aria-selected="${x === k}" class="${x === k ? "on" : ""}" data-k="${x}">${KIND_LABEL[x]}<span class="cnt">${count(x)}</span></button>`).join("")}</div>
+    <div class="filter-bar">
+      <span class="muted">${DESC[k].split(" · ").map(esc).join("&nbsp;· ")}</span>
+    </div>
+    ${!list.length ? `<div class="empty">아직 ${KIND_LABEL[k]} 후기가 없어요<br>첫 후기를 남겨주세요!
+        <div><a class="btn empty-btn" href="${esc(formLink(g, name, k))}" target="_blank">✏️ 첫 ${KIND_LABEL[k]} 쓰기</a></div></div>`
+      : !viewUnlocked() ? gateHTML(formLink(g, name, k))
+      : list.map(r => `
+      <div class="review">
+        <div class="top"><span class="stars">${starStr(r.rating)}</span>${nickDate(r)}</div>
+        ${has(r.body) ? `<p>${linkify(r.body)}</p>` : ""}
+        ${block("꿀팁", r.tip)}
+      </div>`).join("")}
+    ${list.length ? `<a class="btn fab" href="${esc(formLink(g, name, k))}" target="_blank">✏️ ${KIND_LABEL[k]} 쓰기</a>` : ""}`;
+  bindGate();
+  document.querySelectorAll(".filters button").forEach(el => el.onclick = () => {
+    detailKind = el.dataset.k;
+    const y = window.scrollY; renderSubject(g, name); window.scrollTo(0, y);
+  });
+  window.scrollTo(0, 0);
+}
+
+// ===== 실습후기 =====
+const practiceList = c => [...(PRACTICES[c] || []), [OTHER_PRACTICE, "", PRACTICE_OTHER_DESC]];
+const practiceLink = t => withParams(PRACTICE_FORM_URL, [
+  PRACTICE_COLLEGE_ENTRY && PRACTICE_COLLEGE_ENTRY + "=" + encodeURIComponent(college),
+  t && PRACTICE_TYPE_ENTRY && PRACTICE_TYPE_ENTRY + "=" + encodeURIComponent(t),
+].filter(Boolean));
+
+function renderPractice() {
+  view = "practice";
+  const mine = practices.filter(x => x.college === college);
+  $app.innerHTML = `
+    ${header()}
+    ${collegeTabs()}
+    ${honeyBanner()}
+    <div class="rows list-top">${practiceList(college).map(([name, yr, desc]) => {
+      const rs = mine.filter(x => x.type === name), avg = avgOf(rs);
+      return `<div class="row-item" data-p="${esc(name)}">
+        <div>
+          <div class="name">${esc(name)}${yr ? ` <span class="yr">${esc(yr)}</span>` : ""}</div>
+          ${desc ? `<div class="desc">${esc(desc)}</div>` : ""}
+          <div class="meta2">${rs.length ? `<span class="s">★</span> ${avg.toFixed(1)} · 후기 ${rs.length}` : "아직 후기 없음"}</div>
+        </div>
+        <span class="chev">›</span>
+      </div>`;
+    }).join("")}</div>
+    ${(PRACTICES[college] || []).length ? "" : `<div class="common-note">${college} 필수 실습 목록은 준비 중이에요</div>`}
+    ${credit()}
+    <a class="btn fab" href="${esc(practiceLink(""))}" target="_blank">✏️ 실습후기 쓰기</a>`;
+  bindHeader(); bindColleges(renderPractice);
+  document.querySelectorAll(".row-item").forEach(el => el.onclick = () =>
+    location.hash = "pc=" + encodeURIComponent(college) + "&pt=" + encodeURIComponent(el.dataset.p));
+}
+
+function renderPracticeDetail(name) {
+  const info = practiceList(college).find(([n]) => n === name) || [name, "", ""];
+  const list = practices.filter(x => x.college === college && x.type === name);
+  const avg = avgOf(list);
+  const link = practiceLink(name === OTHER_PRACTICE ? "" : name);
+  const block = (label, text) => has(text) ? `<span class="tag">${label}</span><p>${linkify(text)}</p>` : "";
+  $app.innerHTML = `
+    <button class="back" onclick="location.hash='v=practice'">← ${college} 실습후기</button>
+    <div class="head">
+      <div>
+        <span class="pill">${college} · 실습${info[1] ? " · " + esc(info[1]) : ""}</span>
+        <h1>${esc(name)}</h1>
+        ${info[2] ? `<div class="muted head-desc">${esc(info[2])}</div>` : ""}
+        <span class="big">${avg.toFixed(1)}</span> <span class="stars">${starStr(avg)}</span>
+        <span class="muted"> · 후기 ${list.length}개</span>
+      </div>
+    </div>
+    ${!list.length ? `<div class="empty">아직 ${esc(name)} 후기가 없어요<br>첫 후기를 남겨주세요!
+        <div><a class="btn empty-btn" href="${esc(link)}" target="_blank">✏️ 첫 실습후기 쓰기</a></div></div>`
+      : !viewUnlocked() ? gateHTML(link)
+      : list.map(x => `
+      <div class="review">
+        <div class="top"><span class="stars">${starStr(x.rating)}</span>${nickDate(x)}</div>
+        ${has(x.place) || has(x.when) ? `<div class="chips-mini">${has(x.place) ? `<span class="pill">📍 ${esc(x.place)}</span>` : ""}${has(x.when) ? `<span class="pill">${esc(x.when)}</span>` : ""}</div>` : ""}
+        ${has(x.body) ? `<p>${linkify(x.body)}</p>` : ""}
+        ${block("꿀팁", x.tip)}
+      </div>`).join("")}
+    ${list.length && viewUnlocked() ? `<a class="btn fab" href="${esc(link)}" target="_blank">✏️ 실습후기 쓰기</a>` : ""}`;
+  bindGate();
+  window.scrollTo(0, 0);
+}
+
+// ===== 국시 · 예비시험 후기 =====
+function renderExam() {
+  const list = exams.filter(x => x.college === college && x.type === examType);
+  const block = (label, text) => has(text) ? `<span class="tag">${label}</span><p>${linkify(text)}</p>` : "";
+  const dots = n => "●".repeat(Math.round(n)) + "○".repeat(5 - Math.round(n));
+  const link = withParams(EXAM_FORM_URL, [
+    EXAM_COLLEGE_ENTRY && EXAM_COLLEGE_ENTRY + "=" + encodeURIComponent(college),
+    EXAM_TYPE_ENTRY && EXAM_TYPE_ENTRY + "=" + encodeURIComponent(examType),
+  ].filter(Boolean));
+
+  $app.innerHTML = `
+    ${header()}
+    ${collegeTabs()}
+    <div class="two">${["예비시험","국시"].map(t =>
+      `<button class="tab ${t === examType ? "on" : ""}" data-t="${t}">${t}</button>`).join("")}</div>
+    ${honeyBanner()}
+    <div class="list-top">
+    ${list.length && !viewUnlocked() ? gateHTML(link) : list.map(x => `
+      <div class="review">
+        <div class="top">
+          <span>${has(x.when) ? `<span class="pill">${esc(x.when)}</span>` : ""}</span>
+          ${nickDate(x)}
+        </div>
+        ${x.diff ? `<div class="muted">난이도 <span class="diff">${dots(x.diff)}</span></div>` : ""}
+        ${block("공부 방법", x.study)}${block("시험 후기", x.review)}${block("꿀팁", x.tip)}
+      </div>`).join("") || `<p class="empty">아직 ${college} ${examType} 후기가 없어요<br>첫 후기를 남겨주세요!</p>`}
+    </div>
+    ${credit()}
+    ${list.length && !viewUnlocked() ? "" : `<a class="btn fab" href="${esc(link)}" target="_blank">✏️ ${examType} 후기 쓰기</a>`}`;
+
+  bindHeader(); bindGate(); bindColleges(renderExam);
+  document.querySelectorAll(".two .tab").forEach(el => el.onclick = () => { examType = el.dataset.t; renderExam(); });
+}
+
+// ===== 홍보 게시판 =====
+function renderPromo() {
+  const cats = ["전체", "동아리", "스터디", "과외", ...new Set(promos.map(p => p.cat).filter(c => !["동아리","스터디","과외"].includes(c)))];
+  const list = promoCat === "전체" ? promos : promos.filter(p => p.cat === promoCat);
+
+  $app.innerHTML = `
+    ${header()}
+    <div class="chips">${cats.map(c =>
+      `<button class="tab ${c === promoCat ? "on" : ""}" data-c="${esc(c)}">${esc(c)}</button>`).join("")}</div>
+    ${sampleNotice()}
+    <div class="list-top">
+    ${list.map(p => `
+      <div class="post">
+        <div class="meta"><span>${sampleBadge(p)}<span class="pill">${esc(p.cat)}</span></span><span class="muted">${esc(p.date)}</span></div>
+        <h3>${esc(p.title)}</h3>
+        <p class="body">${linkify(p.body)}</p>
+        <div class="more">더보기</div>
+        ${has(p.contact) ? `<div class="contact">연락처 · ${linkify(p.contact)}</div>` : ""}
+      </div>`).join("") || '<p class="empty">아직 홍보글이 없어요</p>'}
+    </div>
+    ${credit()}
+    <a class="btn fab" href="${esc(PROMO_FORM_URL || "#")}" target="_blank">✏️ 홍보글 쓰기</a>`;
+
+  bindHeader(); bindPosts();
+  document.querySelectorAll(".chips .tab").forEach(el => el.onclick = () => { promoCat = el.dataset.c; renderPromo(); });
+}
+
+// ===== 정보 게시판 =====
+const driveLinks = () => DRIVE_LINKS.length ? `<div class="links">${DRIVE_LINKS.map(([label, url]) =>
+  `<a class="drive" href="${esc(url || "#")}" target="_blank" rel="noopener">
+    <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span>
+    ${esc(label)}<span class="arrow">→</span></a>`).join("")}</div>` : "";
+
+function renderInfo() {
+  $app.innerHTML = `
+    ${header()}
+    ${sampleNotice()}
+    <div class="list-top">
+    ${infos.map(x => `
+      <div class="post ${x.pin ? "pin" : ""}">
+        <div class="meta"><span>${sampleBadge(x)}${x.pin ? '<span class="pill">고정</span>' : ""}</span><span class="muted">${esc(x.date)}</span></div>
+        <h3>${esc(x.title)}</h3>
+        <p class="body">${linkify(x.body)}</p>
+        <div class="more">더보기</div>
+        ${x.photos.length ? `<div class="photos">${x.photos.map(u =>
+          `<a href="${esc(u)}" target="_blank"><img src="${esc(u)}" alt="" loading="lazy" onerror="this.parentNode.remove()"></a>`).join("")}</div>` : ""}
+        ${has(x.link) ? `<div class="contact">${linkify(x.link)}</div>` : ""}
+      </div>`).join("") || '<p class="empty">아직 정보글이 없어요</p>'}
+    </div>
+    ${credit()}
+    <a class="btn fab" href="${esc(INFO_FORM_URL || "#")}" target="_blank">✏️ 정보 공유하기</a>`;
+
+  bindHeader(); bindPosts();
+}
+
+// ===== 졸업생 게시판 =====
+let gradCat = "전체";
+function renderGrad() {
+  const base = ["진로", "취업·병원", "기타"];
+  const mine = grads.filter(p => p.college === college);
+  const cats = ["전체", ...base, ...new Set(mine.map(p => p.cat).filter(c => !base.includes(c)))];
+  const list = gradCat === "전체" ? mine : mine.filter(p => p.cat === gradCat);
+
+  $app.innerHTML = `
+    ${header()}
+    ${collegeTabs()}
+    <div class="chips">${cats.map(c =>
+      `<button class="tab ${c === gradCat ? "on" : ""}" data-c="${esc(c)}">${esc(c)}</button>`).join("")}</div>
+    ${sampleNotice()}
+    <div class="list-top">
+    ${list.map(p => `
+      <div class="post">
+        <div class="meta"><span>${sampleBadge(p)}<span class="pill">${esc(p.cat)}</span>${has(p.year) ? ` <span class="muted">${esc(p.year.replace(/\D/g, "") || p.year)} 졸업</span>` : ""}</span><span class="muted">${esc(p.date)}</span></div>
+        <h3>${esc(p.title)}</h3>
+        <p class="body">${linkify(p.body)}</p>
+        <div class="more">더보기</div>
+        ${has(p.contact) ? `<div class="contact">연락처 · ${linkify(p.contact)}</div>` : ""}
+      </div>`).join("") || `<p class="empty">아직 ${college} 졸업생 글이 없어요</p>`}
+    </div>
+    ${credit()}
+    <a class="btn fab" href="${esc(withParams(GRAD_FORM_URL, GRAD_COLLEGE_ENTRY ? [GRAD_COLLEGE_ENTRY + '=' + encodeURIComponent(college)] : []))}" target="_blank">✏️ 졸업생 글쓰기</a>`;
+
+  bindHeader(); bindPosts(); bindColleges(renderGrad);
+  document.querySelectorAll(".chips .tab").forEach(el => el.onclick = () => { gradCat = el.dataset.c; renderGrad(); });
+}
+
+function route() {
+  const m = location.hash.match(/^#(?:c=([^&]+)&)?g=(\d|E)&(?:k=([RMCEF])&)?s=(.+)$/);
+  const v = location.hash.match(/^#v=(\w+)$/);
+  const gx = location.hash.match(/^#c=([^&]+)&gradexam$/);
+  if (gx) {
+    view = "subject";
+    if (COLLEGES.includes(decodeURIComponent(gx[1]))) college = decodeURIComponent(gx[1]);
+    renderGradExam(); return;
+  }
+  const pm = location.hash.match(/^#pc=([^&]+)&pt=(.+)$/);
+  if (pm) {
+    view = "practice";
+    if (COLLEGES.includes(decodeURIComponent(pm[1]))) college = decodeURIComponent(pm[1]);
+    renderPracticeDetail(decodeURIComponent(pm[2])); return;
+  }
+  if (m) {
+    view = "subject";
+    if (m[1] && COLLEGES.includes(decodeURIComponent(m[1]))) college = decodeURIComponent(m[1]);
+    grade = m[2] === "E" ? "E" : Number(m[2]);
+    if (m[3]) detailKind = { R: "R", M: "M", C: "C", E: "E", F: "F" }[m[3]] || "R";
+    renderSubject(grade, decodeURIComponent(m[4])); return;
+  }
+  view = v ? v[1] : "subject";
+  window.scrollTo(0, 0);
+  if (view === "exam") renderExam();
+  else if (view === "promo") renderPromo();
+  else if (view === "info") renderInfo();
+  else if (view === "grad") renderGrad();
+  else if (view === "practice") renderPractice();
+  else renderHome();
+}
+window.addEventListener("hashchange", () => { if (loaded) route(); });
+
+// ===== 비밀번호 화면 =====
+async function sha256(text) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+}
+// ===== 후기 열람코드 =====
+function viewUnlocked() {
+  try { return localStorage.getItem("viewUnlock") === VIEW_CODE_HASH; } catch (e) { return false; }
+}
+function gateHTML(writeLink) {
+  return `<div class="gate">
+    <div class="emoji">🔑</div>
+    <h3>열람코드가 필요해요</h3>
+    <p class="muted gate-desc"><span class="nb">과목 · 실습 · 국시·예비시험</span> <span class="nb">후기를</span> <span class="nb">1개 작성하면</span> <span class="nb">공통 열람코드를 받을 수 있어요</span></p>
+    <div class="row">
+      <input class="search" id="vc" placeholder="열람코드" autocomplete="off">
+      <button class="btn" id="vcgo">열기</button>
+    </div>
+    <div class="err" id="vcerr"></div>
+    <a class="write" href="${esc(writeLink)}" target="_blank">후기 쓰고 코드 받기 →</a>
+  </div>`;
+}
+function bindGate() {
+  const input = document.getElementById("vc");
+  if (!input) return;
+  const tryIt = async () => {
+    if (await sha256(input.value.normalize("NFC").replace(/\s+/g, "")) === VIEW_CODE_HASH) {
+      try { localStorage.setItem("viewUnlock", VIEW_CODE_HASH); } catch (e) {}
+      route();
+    } else {
+      document.getElementById("vcerr").textContent = "열람코드가 틀렸어요";
+      input.value = ""; input.focus();
+    }
+  };
+  document.getElementById("vcgo").onclick = tryIt;
+  input.onkeydown = e => { if (e.key === "Enter") tryIt(); };
+}
+
+function remembered() {
+  try { return localStorage.getItem("unlock") === PASSWORD_HASH; } catch (e) { return false; }
+}
+function showLock() {
+  $app.innerHTML = `
+    <div class="lock">
+      <div class="emoji">🔒</div>
+      ${titleHTML()}
+      <p class="muted">비밀번호를 입력해 주세요</p>
+      <input class="search" id="pw" type="password" placeholder="비밀번호" autocomplete="current-password">
+      <button class="btn" id="go">입장하기</button>
+      <div class="err" id="err"></div>
+      ${credit(guideBtn())}
+    </div>`;
+  const pw = document.getElementById("pw");
+  const tryIt = async () => {
+    if (await sha256(pw.value.trim()) === PASSWORD_HASH) {
+      try { localStorage.setItem("unlock", PASSWORD_HASH); } catch (e) {}
+      $app.innerHTML = '<p class="muted">불러오는 중…</p>';
+      load();
+    } else {
+      document.getElementById("err").textContent = "비밀번호가 틀렸어요";
+      pw.value = ""; pw.focus();
+    }
+  };
+  document.getElementById("go").onclick = tryIt;
+  pw.onkeydown = e => { if (e.key === "Enter") tryIt(); };
+  pw.focus();
+}
+remembered() ? load() : showLock();
+</script>
+</body>
+</html>
