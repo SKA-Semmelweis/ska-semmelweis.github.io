@@ -51,7 +51,7 @@
   const EXAM_TYPE_ENTRY = "";   // (선택) 미리 채워진 링크의 시험 종류 칸 번호
 
   // 홍보 게시판 폼 & 시트
-  // 폼 순서: 분류(동아리/스터디/과외 객관식) → 제목 → 내용 → 연락처
+  // 폼 순서: 분류(동아리/스터디/과외 객관식) → 제목 → 내용 → 연락처 → 사진(파일 업로드, 선택)
   const PROMO_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ4oEbFdCvvnDgcr4x2ouuY2psHhXWw50kvQvXK1E8h4tHkG2ClqlXXbBY9zyThIWJF8sF6j6a1WhUU/pub?gid=440448854&single=true&output=csv";
   const PROMO_FORM_URL = "https://forms.gle/1qFpBvawroz5M5Dg6";
 
@@ -122,7 +122,7 @@ SKA 한인학생회 선후배가 함께 후기와 정보를 나누는 공간이�
 - 제출한 후기는 몇 분 뒤에 사이트에 반영돼요
 - 출석, 시험 형식, 공부량처럼 구체적으로 쓸수록 큰 도움이 돼요
 - 닉네임은 선택이에요. 적으면 후기 옆에 작게 보여요
-- 학기말에 후기를 많이 남긴 닉네임을 뽑아 작은 선물을 드려요 🎁
+- 학기말에 후기를 많이 남긴 분께 선물을 드려요 🎁
 
 # 열람코드
 - 후기 내용은 열람코드가 있어야 볼 수 있어요
@@ -148,8 +148,9 @@ SKA 한인학생회 선후배가 함께 후기와 정보를 나누는 공간이�
 # 게시판
 - 졸업생: 단과대별 선배들의 진로 · 취업 이야기
 - 병원 이름이 부담스럽다면 '부산 대학병원'처럼 두루뭉술하게 적어도 괜찮아요
-- 홍보: 동아리 · 스터디 · 과외 모집글
+- 홍보: 동아리 · 스터디 · 과외 모집글 (포스터 사진 가능)
 - 정보: 학교생활 알짜 정보, 사진도 올릴 수 있어요
+- 홍보 · 정보 게시판의 사진은 한 학기가 지나면 정리돼요. 오래 남겨야 할 내용은 글에도 적어 주세요
 - 스카 드라이브 자료는 과목후기 화면 위쪽에 있어요
 
 # 함께 지켜요
@@ -977,9 +978,10 @@ async function load() {
     date: cleanDate(r[0]), college: collegeOf(r[1]), type: /국/.test(r[2]) ? "국시" : "예비시험",
     when: r[3], diff: toRating(r[4]), study: r[5], review: r[6], tip: r[7], nick: r[8],
   })).reverse();
-  // 홍보: 타임스탬프, 분류, 제목, 내용, 연락처
+  // 홍보: 타임스탬프, 분류, 제목, 내용, 연락처, 사진
   const promoRows = rows => rows.map((r, i) => [r, i]).filter(([r]) => has(r[2]) || has(r[3])).map(([r, i]) => ({
     id: i, date: cleanDate(r[0]), cat: (r[1] || "기타").trim(), title: r[2], body: r[3], contact: r[4],
+    photos: (r[5] || "").split(/[\s,]+/).filter(Boolean).map(photoURL),
   })).reverse();
   // 정보: 타임스탬프, 제목, 내용, 링크, 사진, (고정) — 고정글 먼저, 나머지는 최신순
   const infoRows = rows => {
