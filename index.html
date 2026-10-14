@@ -10,43 +10,41 @@
      ✏️ 설정은 여기서만 고치면 돼요! (따옴표 안에 붙여넣기)
      ====================================================== */
   // ── 1~3학년 후기 폼 & 시트
-  //    섹션1: "단과대·학년"(의대 1학년 … 약대 3학년, 고르면 그 학년 과목 섹션으로 이동) + "후기 종류"(수강후기 / Exam / Midterm / Competition)
-  //    과목 섹션들: 각각 "과목명" 드롭다운 하나 → 다 끝나면 마지막 섹션으로
-  //    마지막 섹션: 별점 → 후기 내용 → 꿀팁 → 닉네임(선택)
-  //    ※ 사이트는 질문 '제목'으로 읽어요. 제목에 단과대 / 학년 / 종류 / 과목명 / 별점 / 내용 / 꿀팁 / 닉네임이 들어가게 해주세요
-  const LOWER_CSV_URL = "";      // 시트 '웹에 게시' → CSV 링크 (비워두면 예시 후기가 보여요)
-  const LOWER_FORM_URL = "";
+  //    섹션1: "단과대·학년"(의대 1학년 … 약대 3학년, 고르면 그 학년 과목 섹션으로 이동)
+  //    과목 섹션들: "과목명" 드롭다운 + "후기 종류"(수강후기 / Midterm / Competition, 답변에 따라 섹션 이동)
+  //    수강후기 섹션: 별점 → 수강 후기 → 시험 후기(Final · Semi-final) → 꿀팁 → 닉네임  (한 번에 수강후기 + Exam)
+  //    Midterm · Competition 섹션: 별점 → 후기 내용 → 꿀팁 → 닉네임
+  //    ※ 사이트는 질문 '제목'으로 읽어요. 제목에 단과대 / 학년 / 종류 / 과목명 / 별점 / 수강 후기 / 시험 후기 / 후기 내용 / 꿀팁 / 닉네임이 들어가게 해주세요
+  const LOWER_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSH_MLyIxOc_hLnj7CHIUaD_pQafFmhpIJxXbPDkRbO6G2DRAe6GBUyVGoo5HTQGY0BMIewBBOHyyIg/pub?gid=1802454202&single=true&output=csv";      // 시트 '웹에 게시' → CSV 링크 (비워두면 예시 후기가 보여요)
+  const LOWER_FORM_URL = "https://forms.gle/7XGTc85dkKFqXXCD8";
   const LOWER_COLLEGE_GRADE_ENTRY = "";  // (선택) 미리 채워진 링크의 "단과대·학년" 칸 번호 (예: "entry.123456789")
-  const LOWER_KIND_ENTRY = "";
 
   // ── 4학년 이상 후기 폼 & 시트 (의대 4~6학년, 치대·약대 4~5학년)
   //    1~3학년 폼과 같은 구조. "단과대·학년"은 의대 4·5·6학년 / 치대 4·5학년 / 약대 4·5학년 + "의대 6학년 졸업시험"
-  //    "의대 6학년 졸업시험"을 고르면 과목 섹션을 건너뛰고 바로 마지막 섹션(별점·후기)으로 가게 해주세요
-  //    그래서 이 폼은 "후기 종류"(수강후기 / Exam)를 섹션1이 아니라 각 과목 섹션 안에 넣어요
-  const UPPER_CSV_URL = "";
-  const UPPER_FORM_URL = "";
+  //    과목 섹션: "과목명" 드롭다운만 → 수강후기 섹션(별점 → 수강 후기 → 시험 후기 → 꿀팁 → 닉네임)
+  //    "의대 6학년 졸업시험"을 고르면 과목 섹션을 건너뛰고 졸업시험 섹션(별점 → 후기 내용 → 꿀팁 → 닉네임)으로
+  const UPPER_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSWGnGY2U6DxVNCWosnFTu9urUgQcBnRXFftC9aH45n3rzriEK5AfzFfGx_xEW9-VI3GAP4AVSakJhU/pub?gid=1257342104&single=true&output=csv";
+  const UPPER_FORM_URL = "https://forms.gle/SaoctJe7VGtSjqzy7";
   const UPPER_COLLEGE_GRADE_ENTRY = "";
-  const UPPER_KIND_ENTRY = "";
   // 실제 글이 이 개수보다 적으면 예시 글을 같이 보여줘요 (게시판 · 폼마다 따로 세요)
   const SAMPLE_UNTIL = 3;
   // 사이트 제목
   const SITE_TITLE = "Semmelweis University";
   const SITE_SUBTITLE = "SKA 한인학생회";
   // 건의사항 & 오류 신고 버튼 링크
-  const FEEDBACK_FORM_URL = "";   // 오픈카톡 링크 (예: https://open.kakao.com/o/xxxx)
+  const FEEDBACK_FORM_URL = "https://pf.kakao.com/_qCUhxj";   // SKA 한인학생회 카카오톡 채널
 
   // Elective 전용 구글폼 & 시트 (과목명은 '단답형'으로 자유롭게 쓰게)
   // Elective는 의대 · 치대 · 약대 공통이라 단과대 질문이 없어요
-  // 폼 순서: 후기 종류(수강후기 / Exam) → 과목명 → 별점 → 후기 내용 → 꿀팁 → 닉네임(선택)
-  const ELECTIVE_CSV_URL = "";
-  const ELECTIVE_FORM_URL = "";
-  const ELECTIVE_KIND_ENTRY = "";
+  // 질문: 과목명 → 별점 → 후기 내용 → 꿀팁 → 닉네임(선택)  (수강후기만 · 제목으로 읽어서 순서는 상관없어요)
+  const ELECTIVE_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRKKCtOe6eM914x7sDkzD7UWW96yXvoO6r-wL96-5g2l-kzmR2fhIg2agOz18a3qW9iRT_t3Y9a2sN0/pub?gid=1809502126&single=true&output=csv";
+  const ELECTIVE_FORM_URL = "https://forms.gle/MDD9h4zEsEirwxGx6";
   const ELECTIVE_SUBJECT_ENTRY = "";   // (선택) 미리 채워진 링크의 과목명 칸 번호
 
   // 국시 · 예비시험 후기 폼 & 시트
   // 폼 순서: 단과대(의대 / 치대 / 약대) → 시험 종류(객관식: 예비시험 / 국시) → 응시 시기 → 난이도(1~5) → 공부 방법·자료 → 시험 후기 → 꿀팁 → 닉네임(선택)
-  const EXAM_CSV_URL = "";
-  const EXAM_FORM_URL = "";
+  const EXAM_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRO9O-d_iR8LPVypSwXpwgSRqVSNDmpTyM3edNy4TByF4gpojD2Lk7N-QN8VLeT6rhvvxtA75ago8eD/pub?gid=1626328248&single=true&output=csv";
+  const EXAM_FORM_URL = "https://forms.gle/tkrxeCi8D34PBQE46";
   const EXAM_COLLEGE_ENTRY = "";  // (선택) 미리 채워진 링크의 단과대 칸 번호
   const EXAM_TYPE_ENTRY = "";   // (선택) 미리 채워진 링크의 시험 종류 칸 번호
 
@@ -57,14 +55,14 @@
 
   // 자료 링크 — ["보이는 이름", "주소"] 형식으로 여러 개 추가 가능
   const DRIVE_LINKS = [
-    ["스카 드라이브 자료", ""],   // 따옴표 안에 구글 드라이브 폴더 링크 붙여넣기
+    ["스카 드라이브 자료", "https://drive.google.com/drive/folders/1qHtRWYITEIrjIN_vax-cVpLZM1BRNAjO?usp=drive_link"],
   ];
 
   // ── 실습후기 폼 & 시트 (질문 제목으로 읽어요)
   //    단과대(의대 / 치대 / 약대) → 실습 종류(아래 PRACTICES 이름 + "기타 실습") → 실습 장소(병원·도시, 단답)
   //    → 실습 시기(예: 2026 여름, 단답) → 별점 → 후기 내용 → 꿀팁 → 닉네임(선택)
-  const PRACTICE_CSV_URL = "";
-  const PRACTICE_FORM_URL = "";
+  const PRACTICE_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTqQwOg2oA4lJDEEXmxHawyh9pIuhrE2GLp8R1o_uh7HLugKMia3HrE88H_yUp3YZdQ0A9w_tj-gIM8/pub?gid=120441956&single=true&output=csv";
+  const PRACTICE_FORM_URL = "https://forms.gle/bKU77SDhHHgQr2ye7";
   const PRACTICE_COLLEGE_ENTRY = "";  // (선택) 미리 채워진 링크의 단과대 칸 번호
   const PRACTICE_TYPE_ENTRY = "";     // (선택) 미리 채워진 링크의 실습 종류 칸 번호
 
@@ -89,16 +87,16 @@
   const PRACTICE_OTHER_DESC = "서브인턴, 한국 · 미국 · 독일 등 국내외 병원 실습";
 
   // 졸업생 게시판 폼 & 시트
-  // 폼 순서: 단과대(의대 / 치대 / 약대) → 졸업 연도 → 분류(진로 / 취업·병원 / 기타) → 제목 → 내용 → 연락처(선택)
-  const GRAD_CSV_URL = "";
-  const GRAD_FORM_URL = "";
+  // 폼 순서: 단과대(의대 / 치대 / 약대) → 졸업 연도(선택) → 분류(진로 / 취업·병원 / 기타) → 제목 → 내용 → 연락처(선택)
+  const GRAD_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTU_9q9R4xCIr9iTIagJmN5DpXEhJHI_epxCUPv0_elej72OXDQfhFc-4qosWAx6_OsrkBkZJF6BfRv/pub?gid=1496067869&single=true&output=csv";
+  const GRAD_FORM_URL = "https://forms.gle/5wkQiRjBBCwhCAA39";
   const GRAD_COLLEGE_ENTRY = "";   // (선택) 미리 채워진 링크의 단과대 칸 번호
 
   // 정보 게시판 폼 & 시트 (누구나 작성)
   // 폼 순서: 제목 → 내용 → 링크(선택) → 사진(파일 업로드, 선택)
   // 고정하고 싶은 글은 응답 시트 맨 오른쪽에 '고정' 열을 직접 만들고 아무 글자나 쓰면 맨 위에 고정돼요
-  const INFO_CSV_URL = "";
-  const INFO_FORM_URL = "";
+  const INFO_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTVBlPued6nD83XQLxC-hWx-I7hhcNEyaQi7QgrtvDLGOlexR6XNZm0YXDUAWsx4NdZdJ2wqJ4FnJiF/pub?gid=1726767213&single=true&output=csv";
+  const INFO_FORM_URL = "https://forms.gle/xSEsvUCENCDYxSX77";
 
   /* ======================================================
      📖 이용안내 내용 — 아래 ` 사이에 자유롭게 쓰세요
@@ -118,7 +116,9 @@ SKA 한인학생회 선후배가 함께 후기와 정보를 나누는 공간이�
 
 # 후기 쓰기
 - 오른쪽 아래 '쓰기' 버튼을 누르면 구글폼으로 이동해요
-- 과목 안에서 누르면 학년 · 과목 · 후기 종류가 미리 입력돼요
+- 수강후기를 쓸 때 시험 후기(Final · Semi-final)도 같이 적어요. 사이트에서는 수강후기 / Exam 탭에 나눠서 보여요
+- Midterm · Competition 후기는 따로 써요 (1~3학년)
+- Elective는 수강후기만 있어요
 - 제출한 후기는 몇 분 뒤에 사이트에 반영돼요
 - 출석, 시험 형식, 공부량처럼 구체적으로 쓸수록 큰 도움이 돼요
 - 닉네임은 선택이에요. 적으면 후기 옆에 작게 보여요
@@ -686,6 +686,7 @@ SKA 한인학생회 선후배가 함께 후기와 정보를 나누는 공간이�
   .gate .write { margin-top:2px; }
 
   /* 과목 상세: 후기 유형 필터 */
+  .filters[hidden] { display:none; }
   .filters { display:flex; gap:2px; margin-top:4px;
              background:var(--line); padding:3px; border-radius:12px; }
   .filters button { border:none; background:none; color:var(--sub); font-family:inherit; cursor:pointer;
@@ -774,21 +775,18 @@ SKA 한인학생회 선후배가 함께 후기와 정보를 나누는 공간이�
 <div class="wrap" id="app"><p class="muted">불러오는 중…</p></div>
 
 <script>
-// 예시 1~3학년 — 타임스탬프, 단과대·학년, 후기 종류, 과목명, 별점, 후기 내용, 꿀팁
+// 예시 과목후기 — REVIEW_HEADER 순서: 타임스탬프, 단과대·학년, 후기 종류, 과목명, 별점, 수강 후기, 시험 후기, 후기 내용(Midterm·Competition·졸업시험), 꿀팁, 닉네임
 const SAMPLE_LOWER = [
-  ["2026. 9. 18","치대 1학년","수강후기","General Dental Materials","4","실습 위주라 출석 필수, 재료 이름 외울 게 많아요.","실습 노트 꼼꼼히 정리하기","치과의꿈"],
-  ["2026. 9. 21","약대 1학년","수강후기","General Chemistry","3","렉처 속도 빠르고 매주 퀴즈가 있어요.","연습문제 미리 풀어가기",""],
-  ["2026. 9. 15","의대 1학년","수강후기","Macroscopic Anatomy and Embryology I","4","렉처 양이 많고 교수님 설명이 빨라요. 프렉 해부실습은 출석 필수, 과제는 거의 없어요.","아틀라스 끼고 살기","해부왕"],
-  ["2026. 10. 1","의대 1학년","Midterm","Macroscopic Anatomy and Embryology I","3","뼈 파트 땡시 형식이라 시간이 빠듯했어요.","라틴어 철자 틀리면 감점",""],
-  ["2026. 12. 20","의대 1학년","Exam","Macroscopic Anatomy and Embryology I","4","Final은 구술 + 필기. 구술은 표본 들고 설명하는 방식이에요.","Semi-final 점수가 반영되니 꼭 챙기기","생리학러버"],
-  ["2026. 10. 5","의대 2학년","Competition","Medical Physiology I","5","서술형 위주, 상위권은 가산점이 있어요.","미리 신청해야 해요",""],
+  ["2026. 9. 18","치대 1학년","수강후기","General Dental Materials","4","실습 위주라 출석 필수, 재료 이름 외울 게 많아요.","","","실습 노트 꼼꼼히 정리하기","치과의꿈"],
+  ["2026. 9. 21","약대 1학년","수강후기","General Chemistry","3","렉처 속도 빠르고 매주 퀴즈가 있어요.","","","연습문제 미리 풀어가기",""],
+  ["2026. 12. 20","의대 1학년","수강후기","Macroscopic Anatomy and Embryology I","4","렉처 양이 많고 교수님 설명이 빨라요. 프렉 해부실습은 출석 필수, 과제는 거의 없어요.","Final은 구술 + 필기. 구술은 표본 들고 설명하는 방식이에요.","","아틀라스 끼고 살기","해부왕"],
+  ["2026. 10. 1","의대 1학년","Midterm","Macroscopic Anatomy and Embryology I","3","","","뼈 파트 땡시 형식이라 시간이 빠듯했어요.","라틴어 철자 틀리면 감점",""],
+  ["2026. 10. 5","의대 2학년","Competition","Medical Physiology I","5","","","서술형 위주, 상위권은 가산점이 있어요.","미리 신청해야 해요",""],
 ];
-// 예시 4학년 이상 — 타임스탬프, 단과대·학년, 후기 종류, 과목명, 별점, 후기 내용, 꿀팁
 const SAMPLE_UPPER = [
-  ["2026. 6. 2","의대 6학년 졸업시험","","","4","구술 위주, 케이스 하나 받아서 감별진단까지 말해야 해요.","교수님별 기출 질문 정리본 필수","내과가즈아"],
-  ["2026. 9. 20","의대 4학년","수강후기","Surgery","5","렉처는 출첵 없고 프렉은 출석 필수. 병동마다 분위기가 달라요.","프렉 때 적극적으로 질문하면 좋아요","외과지망생"],
-  ["2026. 9. 22","의대 4학년","Exam","Surgery","4","구술시험, 케이스 위주로 물어봐요.","족보 꼭 챙기기",""],
-  ["2026. 9. 25","의대 4학년","수강후기","Dermatology","5","프렉 짧고 편해요. 공부량도 적당해요.","아틀라스 사진 많이 보기","피부과최고"],
+  ["2026. 6. 2","의대 6학년 졸업시험","","","4","","","구술 위주, 케이스 하나 받아서 감별진단까지 말해야 해요.","교수님별 기출 질문 정리본 필수","내과가즈아"],
+  ["2026. 9. 20","의대 4학년","","Surgery","5","렉처는 출첵 없고 프렉은 출석 필수. 병동마다 분위기가 달라요.","구술시험, 케이스 위주로 물어봐요.","","프렉 때 적극적으로 질문하면 좋아요","외과지망생"],
+  ["2026. 9. 25","의대 4학년","","Dermatology","5","프렉 짧고 편해요. 공부량도 적당해요.","사진 보고 진단하는 문제가 나와요.","","아틀라스 사진 많이 보기","피부과최고"],
 ];
 // 예시 졸업생 글 — 타임스탬프, 졸업 연도, 분류, 제목, 내용, 연락처
 // 예시 실습후기 — 질문 제목 순서와 같아요
@@ -804,10 +802,11 @@ const SAMPLE_GRAD = [
   ["2026. 9. 5","의대","2025","진로","부산 대학병원 지원 후기","지원 서류 준비부터 면접 분위기까지 기억나는 대로 적었어요.",""],
   ["2026. 9. 12","의대","2023","취업·병원","독일 병원 취업 준비","독일어 B2부터 시작해서 Approbation까지 걸린 기간과 비용 공유합니다.",""],
 ];
-// 예시 Elective 후기 (의치약 공통) — 타임스탬프, 후기 종류, 과목명, 별점, 후기 내용, 꿀팁
+// 예시 Elective 후기 (의치약 공통) — 타임스탬프, 과목명, 별점, 후기 내용, 꿀팁, 닉네임
+const ELECTIVE_HEADER = ["타임스탬프", "과목명", "별점", "후기 내용", "꿀팁", "닉네임"];
 const SAMPLE_ELECTIVE = [
-  ["2026. 9. 28","수강후기","Library Informatics","5","출첵 없음, 렉처 몇 번만 있어요. 과제 하나로 끝나요.","부담 없이 듣기 좋아요","도서관지박령"],
-  ["2026. 10. 2","수강후기","Chinese Medicine","4","매주 출석, 침술 · 한방 이론을 기초부터 설명해줘요.","렉처 노트만 잘 정리하면 충분해요",""],
+  ["2026. 9. 28","Library Informatics","5","출첵 없음, 렉처 몇 번만 있어요. 과제 하나로 끝나고 시험은 없어요.","부담 없이 듣기 좋아요","도서관지박령"],
+  ["2026. 10. 2","Chinese Medicine","4","매주 출석, 침술 · 한방 이론을 기초부터 설명해줘요.","렉처 노트만 잘 정리하면 충분해요",""],
 ];
 
 // 예시 시험후기 — 타임스탬프, 시험 종류, 응시 시기, 난이도, 공부 방법, 시험 후기, 꿀팁
@@ -907,6 +906,8 @@ try { const s = localStorage.getItem("grade"); grade = s === "E" ? "E" : (Number
 if (grade !== "E" && grade > maxGrade(college)) grade = maxGrade(college);
 
 async function fetchRows(url, keepHeader = false) {
+  // '웹 페이지'(pubhtml) 링크를 붙여넣어도 CSV로 바꿔서 읽어요
+  if (/\/pubhtml/.test(url)) url = url.replace("/pubhtml", "/pub") + (/output=csv/.test(url) ? "" : "&output=csv");
   const res = await fetch(url + (url.includes("?") ? "&" : "?") + "t=" + Date.now());
   const rows = parseCSV(await res.text());
   return keepHeader ? rows : rows.slice(1);  // 첫 줄 = 질문 제목
@@ -923,7 +924,16 @@ function byHeader(rows) {
 // 시트 읽기 (링크가 없으면 빈 목록)
 const source = url => url ? fetchRows(url).catch(() => []) : Promise.resolve([]);
 const sourceH = url => url ? fetchRows(url, true).catch(() => []) : Promise.resolve([]);
-const REVIEW_HEADER = ["타임스탬프", "단과대·학년", "후기 종류", "과목명", "별점", "후기 내용", "꿀팁", "닉네임"];
+const REVIEW_HEADER = ["타임스탬프", "단과대·학년", "후기 종류", "과목명", "별점", "수강 후기", "시험 후기 (Final · Semi-final)", "후기 내용", "꿀팁", "닉네임"];
+// 수강후기 한 번 제출 = 수강후기 + Exam 두 개로 나눠서 보여줘요 (Midterm · Competition · 졸업시험은 하나)
+function splitReview(base, kind, course, exam, body) {
+  if (kind !== "R") return has(body || course || exam) || base.rating ? [{ ...base, kind, body: body || course || exam }] : [];
+  const out = [];
+  if (has(course || body)) out.push({ ...base, kind: "R", body: course || body });
+  if (has(exam)) out.push({ ...base, kind: "E", body: exam });
+  if (!out.length && base.rating) out.push({ ...base, kind: "R", body: "" });
+  return out;
+}
 // 실제 글이 SAMPLE_UNTIL개보다 적으면 뒤에 예시 글을 붙여요
 const mix = (real, samples) => real.length >= SAMPLE_UNTIL ? real
   : [...real, ...samples.map(x => ({ ...x, sample: true, id: x.id === undefined ? undefined : "s" + x.id }))];
@@ -939,23 +949,25 @@ function photoURL(s) {
 
 async function load() {
   const [lRows, uRows, eRows, xRows, pRows, iRows, gRows, prRows] = await Promise.all([
-    sourceH(LOWER_CSV_URL), sourceH(UPPER_CSV_URL), source(ELECTIVE_CSV_URL), source(EXAM_CSV_URL),
+    sourceH(LOWER_CSV_URL), sourceH(UPPER_CSV_URL), sourceH(ELECTIVE_CSV_URL), source(EXAM_CSV_URL),
     source(PROMO_CSV_URL), source(INFO_CSV_URL), source(GRAD_CSV_URL), sourceH(PRACTICE_CSV_URL),
   ]);
   usingSample = false;
   const gradeNum = s => parseInt((s || "").replace(/\D/g, "")) || 0;
 
-  // 학년 폼(1~3, 4학년 이상): 질문 제목으로 읽어요 — 단과대·학년, 후기 종류, 과목명(섹션마다), 별점, 후기 내용, 꿀팁, 닉네임
+  // 학년 폼(1~3, 4학년 이상): 질문 제목으로 읽어요 — 단과대·학년, 후기 종류, 과목명(섹션마다), 별점, 수강 후기, 시험 후기, 후기 내용, 꿀팁, 닉네임
   const gradeRows = rows => {
     const { data, pick } = byHeader(rows);
-    return data.map(r => {
+    return data.flatMap(r => {
       const cg = pick(r, "단과대"), gradExam = /졸업/.test(cg);   // "의대 6학년 졸업시험" = 과목과 별개
-      return {
+      const base = {
         date: cleanDate(r[0]), college: collegeOf(cg), grade: gradeNum(pick(r, "학년")),
-        kind: gradExam ? "F" : kindOf(pick(r, "종류")), subject: gradExam ? "" : pick(r, "과목명"),
-        rating: toRating(pick(r, "별점")), body: pick(r, "후기내용", "내용"), tip: pick(r, "꿀팁"), nick: pick(r, "닉네임"),
+        subject: gradExam ? "" : pick(r, "과목명"),
+        rating: toRating(pick(r, "별점")), tip: pick(r, "꿀팁"), nick: pick(r, "닉네임"),
       };
-    }).filter(x => x.grade && (x.subject || x.kind === "F")).reverse();
+      if (!base.grade || !(base.subject || gradExam)) return [];
+      return splitReview(base, gradExam ? "F" : kindOf(pick(r, "종류")), pick(r, "수강후기"), pick(r, "시험후기"), pick(r, "후기내용"));
+    }).reverse();
   };
   // 실습후기: 질문 제목으로 읽기
   const practiceRows = rows => {
@@ -968,11 +980,18 @@ async function load() {
       };
     }).filter(x => x.type && (has(x.body) || x.rating)).reverse();
   };
-  // Elective 폼 (의치약 공통): 타임스탬프, 후기 종류, 과목명, 별점, 후기 내용, 꿀팁, 닉네임
-  const electiveRows = rows => rows.filter(r => has(r[2])).map(r => ({
-    date: cleanDate(r[0]), college: "공통", grade: "E", kind: kindOf(r[1]),
-    subject: r[2].trim().replace(/\s+/g, " "), rating: toRating(r[3]), body: r[4], tip: r[5], nick: r[6],
-  })).reverse();
+  // Elective 폼 (의치약 공통): 질문 제목으로 읽어요 — 과목명, 별점, 후기 내용(또는 수강 후기), 꿀팁, 닉네임
+  const electiveRows = rows => {
+    const { data, pick } = byHeader(rows);
+    return data.flatMap(r => {
+      const subject = pick(r, "과목명").replace(/\s+/g, " ");
+      if (!subject) return [];
+      const base = { date: cleanDate(r[0]), college: "공통", grade: "E", subject,
+        rating: toRating(pick(r, "별점")), tip: pick(r, "꿀팁"), nick: pick(r, "닉네임") };
+      const body = pick(r, "수강후기") || pick(r, "후기내용");   // Elective는 수강후기만
+      return has(body) || base.rating ? [{ ...base, kind: "R", body }] : [];
+    }).reverse();
+  };
   // 시험후기: 타임스탬프, 단과대, 종류, 시기, 난이도, 공부법, 후기, 꿀팁, 닉네임
   const examRows = rows => rows.filter(r => has(r[2])).map(r => ({
     date: cleanDate(r[0]), college: collegeOf(r[1]), type: /국/.test(r[2]) ? "국시" : "예비시험",
@@ -1001,7 +1020,7 @@ async function load() {
   reviews = [
     ...mix(gradeRows(lRows), gradeRows([REVIEW_HEADER, ...SAMPLE_LOWER])),
     ...mix(gradeRows(uRows), gradeRows([REVIEW_HEADER, ...SAMPLE_UPPER])),
-    ...mix(electiveRows(eRows), electiveRows(SAMPLE_ELECTIVE)),
+    ...mix(electiveRows(eRows), electiveRows([ELECTIVE_HEADER, ...SAMPLE_ELECTIVE])),
   ];
   practices = mix(practiceRows(prRows), practiceRows([PRACTICE_HEADER, ...SAMPLE_PRACTICE]));
   exams = mix(examRows(xRows), examRows(SAMPLE_EXAM));
@@ -1023,19 +1042,21 @@ function withParams(base, params) {
 }
 const KIND_LABEL = { R: "수강후기", E: "Exam", M: "Midterm", C: "Competition", F: "졸업시험" };
 const isLower = g => typeof g === "number" && g <= 3;
-const kindsFor = g => isLower(g) ? ["R", "E", "M", "C"] : ["R", "E"];
+// 수강후기 · Exam은 한 폼에서 같이 써요
+const writeLabel = (k, g) => g === "E" ? "수강후기" : k === "R" || k === "E" ? "수강·시험 후기" : KIND_LABEL[k] + " 후기";
+const kindsFor = g => g === "E" ? ["R"] : isLower(g) ? ["R", "E", "M", "C"] : ["R", "E"];
 function formLink(g, subject, k = "R") {
   const enc = encodeURIComponent, params = [];
   const add = (entry, val) => { if (entry && val) params.push(entry + "=" + enc(val)); };
   if (g === "E") {
-    add(ELECTIVE_KIND_ENTRY, KIND_LABEL[k]); add(ELECTIVE_SUBJECT_ENTRY, subject);
+    add(ELECTIVE_SUBJECT_ENTRY, subject);
     return withParams(ELECTIVE_FORM_URL, params);
   }
   if (isLower(g)) {
-    add(LOWER_COLLEGE_GRADE_ENTRY, college + " " + g + "학년"); add(LOWER_KIND_ENTRY, KIND_LABEL[k]);
+    add(LOWER_COLLEGE_GRADE_ENTRY, college + " " + g + "학년");
     return withParams(LOWER_FORM_URL, params);
   }
-  add(UPPER_COLLEGE_GRADE_ENTRY, college + " " + g + "학년"); add(UPPER_KIND_ENTRY, KIND_LABEL[k]);
+  add(UPPER_COLLEGE_GRADE_ENTRY, college + " " + g + "학년");
   return withParams(UPPER_FORM_URL, params);
 }
 
@@ -1092,6 +1113,10 @@ function renderHome(query = "") {
     const key = (isE ? [] : ((SUBJECTS[college] || {})[grade] || [])).find(s => norm(s) === norm(r.subject))
       || Object.keys(map).find(k => norm(k) === norm(r.subject)) || r.subject;
     (map[key] ||= []).push(r);
+    // 같은 과목을 여러 표기로 썼다면, 대문자가 더 많은(더 정돈된) 이름으로 보여주기
+    const caps = s => (s.match(/[A-Z]/g) || []).length;
+    const nice = r.subject.trim().replace(/\s+/g, " ");
+    if (isE && key !== nice && norm(key) === norm(nice) && caps(nice) > caps(key)) { map[nice] = map[key]; delete map[key]; }
   });
   const list = isE ? [] : ((SUBJECTS[college] || {})[grade] || []);
   let all = [...list, ...Object.keys(map).filter(s => !list.includes(s))];
@@ -1196,7 +1221,7 @@ function renderSubject(g, name) {
   const count = x => all.filter(r => r.kind === x).length;
   const block = (label, text) => has(text) ? `<span class="tag">${label}</span><p>${linkify(text)}</p>` : "";
   const DESC = {
-    R: "수업 · 교수님 · 출석 · 과제 · 공부량",
+    R: isE ? "수업 · 출석 · 과제 · 시험" : "수업 · 교수님 · 출석 · 과제 · 공부량",
     E: "Final · Semi-final",
     M: "중간시험 후기",
     C: "Competition 시험 후기",
@@ -1213,13 +1238,13 @@ function renderSubject(g, name) {
         <span class="muted"> · 후기 ${all.length}개</span>
       </div>
     </div>
-    <div class="filters" role="tablist">${kinds.map(x =>
+    <div class="filters" role="tablist"${kinds.length < 2 ? " hidden" : ""}>${kinds.map(x =>
       `<button role="tab" aria-selected="${x === k}" class="${x === k ? "on" : ""}" data-k="${x}">${KIND_LABEL[x]}<span class="cnt">${count(x)}</span></button>`).join("")}</div>
     <div class="filter-bar">
       <span class="muted">${DESC[k].split(" · ").map(esc).join("&nbsp;· ")}</span>
     </div>
     ${!list.length ? `<div class="empty">아직 ${KIND_LABEL[k]} 후기가 없어요<br>첫 후기를 남겨주세요!
-        <div><a class="btn empty-btn" href="${esc(formLink(g, name, k))}" target="_blank">✏️ 첫 ${KIND_LABEL[k]} 쓰기</a></div></div>`
+        <div><a class="btn empty-btn" href="${esc(formLink(g, name, k))}" target="_blank">✏️ 첫 ${writeLabel(k, g)} 쓰기</a></div></div>`
       : !viewUnlocked() ? gateHTML(formLink(g, name, k))
       : list.map(r => `
       <div class="review">
@@ -1227,7 +1252,7 @@ function renderSubject(g, name) {
         ${has(r.body) ? `<p>${linkify(r.body)}</p>` : ""}
         ${block("꿀팁", r.tip)}
       </div>`).join("")}
-    ${list.length ? `<a class="btn fab" href="${esc(formLink(g, name, k))}" target="_blank">✏️ ${KIND_LABEL[k]} 쓰기</a>` : ""}`;
+    ${list.length ? `<a class="btn fab" href="${esc(formLink(g, name, k))}" target="_blank">✏️ ${writeLabel(k, g)} 쓰기</a>` : ""}`;
   bindGate();
   document.querySelectorAll(".filters button").forEach(el => el.onclick = () => {
     detailKind = el.dataset.k;
