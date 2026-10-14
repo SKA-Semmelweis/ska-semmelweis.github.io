@@ -161,7 +161,7 @@ SKA 한인학생회 선후배가 함께 후기와 정보를 나누는 공간이�
 - 시험 문제 원문 그대로 올리는 것은 피해 주세요
 
 # 문의
-- 없는 과목, 사이트 오류, 건의사항 등이 있다면 아래 '문의하기' 버튼을 눌러 SKA 채널로 문의해 주세요
+- 없는 과목, 사이트 오류, 건의사항 등이 있다면 맨 아래 '건의사항 & 오류 신고' 버튼을 눌러 SKA 채널로 문의해 주세요
 `;
   // 후기 열람코드 (암호화된 값) — 구글폼 '확인 메시지'에 이 코드를 적어두세요
   // 과목후기 내용과 국시·예비시험 후기를 볼 때만 물어봐요
@@ -830,7 +830,7 @@ const SAMPLE_INFO = [
 const $app = document.getElementById("app");
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const credit = (extra = "") => `<div class="credit">
-  <div class="pills">${extra}<a class="feedback" href="${esc(FEEDBACK_FORM_URL || "#")}" target="_blank">문의하기</a></div>
+  <div class="pills">${extra}<a class="feedback" href="${esc(FEEDBACK_FORM_URL || "#")}" target="_blank">건의사항 & 오류 신고</a></div>
   <div>Made by <b>꿀다람쥐</b></div>
   <div class="copy">© 2026 All rights reserved.</div>
 </div>`;
