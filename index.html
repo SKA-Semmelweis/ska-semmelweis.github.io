@@ -1180,7 +1180,7 @@ function bindHeader() {
 const nickDate = x => `<span class="nd">${x.sample ? '<span class="sample-badge">예시</span>' : ""}<span class="muted">${has(x.nick) ? `<span class="nick">${esc(x.nick.trim().slice(0, 20))}</span> · ` : ""}${esc(x.date)}</span></span>`;
 const sampleBadge = x => x.sample ? '<span class="sample-badge">예시</span>' : "";
 // 후기 화면 공통 배너 — 항상 보이고, 시트 연결 전에는 예시 안내가 작게 붙어요
-const honeyBanner = () => `<div class="notice honey"><b>🍯 꿀팁은 나눌수록 커져요</b><span class="honey-sub">짧은 후기라도 괜찮아요. <span class="nb">기억나는 내용만 남겨 주셔도</span> <span class="nb">다음 학기 후배들에게</span> <span class="nb">큰 도움이 돼요.</span></span></div>`;
+const honeyBanner = (who = "다음 학기 후배들에게") => `<div class="notice honey"><b>🍯 꿀팁은 나눌수록 커져요</b><span class="honey-sub">짧은 후기라도 괜찮아요. <span class="nb">기억나는 내용만 남겨 주셔도</span> <span class="nb">${who}</span> <span class="nb">큰 도움이 돼요.</span></span></div>`;
 const sampleNotice = () => "";  // 예시 안내 문구 없음 (예시 글에는 '예시' 표시만 붙어요)
 function bindPosts() {
   // 내용이 짧으면 '더보기' 숨기기
@@ -1414,7 +1414,7 @@ function renderExam() {
     ${collegeTabs()}
     <div class="two">${["예비시험","국시"].map(t =>
       `<button class="tab ${t === examType ? "on" : ""}" data-t="${t}">${t}</button>`).join("")}</div>
-    ${honeyBanner()}
+    ${honeyBanner("시험을 준비하는 후배들에게")}
     <div class="list-top">
     ${list.length && !viewUnlocked() ? gateHTML(link) : list.map(examCard).join("") || `<p class="empty">아직 ${college} ${examType} 후기가 없어요<br>첫 후기를 남겨주세요!</p>`}
     </div>
